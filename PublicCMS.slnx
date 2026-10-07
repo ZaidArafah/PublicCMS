@@ -1,1 +1,5 @@
-<Solution />
+<Solution>
+  <Project Path="PublicCMS.Api/PublicCMS.Api.csproj" Id="db94b55e-ebee-4e68-abeb-37c41ef7fba0" />
+  <Project Path="PublicCMS.Core/PublicCMS.Core.csproj" Id="fed4fb53-c8e7-4517-8568-ebf411817fd3" />
+  <Project Path="PublicCMS.Web/PublicCMS.Web.csproj" Id="07e56dbf-a6d2-49e1-9022-25b3f23f64e2" />
+</Solution>
