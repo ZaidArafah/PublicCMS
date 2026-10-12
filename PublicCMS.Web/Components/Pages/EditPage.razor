@@ -1,0 +1,42 @@
+﻿@page "/admin/redigera-sida/{Id:int}"
+@using PublicCMS.Core.Models
+@using PublicCMS.Core.Repositories
+@inject IPageRepository PageRepo
+@inject NavigationManager NavManager
+
+<h3>Redigera sida</h3>
+
+@if (editPage != null)
+{
+    <div class="mb-3">
+        <label>Rubrik:</label>
+        <input @bind="editPage.Title" class="form-control" />
+    </div>
+
+    <div class="mb-3">
+        <label>Text:</label>
+        <textarea @bind="editPage.Bodytext" class="form-control"></textarea>
+    </div>
+
+    <button class="btn btn-success" @onclick="SaveChanges">Spara ändringar</button>
+}
+
+@code {
+    [Parameter]
+    public int Id { get; set; }
+
+    private Page editPage;
+
+    protected override void OnInitialized()
+    {
+        // Hämtar sidan vi klickat på från databasen
+        editPage = PageRepo.GetById(Id);
+    }
+
+    private void SaveChanges()
+    {
+        // Uppdaterar i databasen och skickar oss tillbaka till listan
+        PageRepo.Update(editPage);
+        NavManager.NavigateTo("/admin/sidor");
+    }
+}

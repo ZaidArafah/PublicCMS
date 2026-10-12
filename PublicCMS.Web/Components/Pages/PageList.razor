@@ -20,6 +20,11 @@
             <tr>
                 <td>@p.Id</td>
                 <td>@p.Title</td>
+
+                <td>
+                    <a href="/admin/redigera-sida/@p.Id" class="btn btn-warning btn-sm">Ändra</a>
+                    <button class="btn btn-danger btn-sm" @onclick="() => DeletePage(p.Id)">Ta bort</button>
+                </td>
             </tr>
         }
     </tbody>
@@ -32,5 +37,11 @@
     protected override void OnInitialized()
     {
         pages = PageRepo.GetAll();
+    }
+
+    private void DeletePage(int id)
+    {
+        PageRepo.Delete(id);
+        pages = PageRepo.GetAll(); // Uppdatera listan efter borttagning
     }
 }

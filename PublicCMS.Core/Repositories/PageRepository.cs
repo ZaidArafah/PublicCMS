@@ -31,5 +31,22 @@ namespace PublicCMS.Core.Repositories
             _context.Pages.Add(page);
             _context.SaveChanges();
         }
+
+        public void Delete(int id)
+        {
+            var page = _context.Pages.Find(id);
+            if (page != null)
+            {
+                _context.Pages.Remove(page);
+                _context.SaveChanges();
+            }
+        }
+
+
+        public void Update(Page page)
+        {
+            _context.Pages.Update(page);
+            _context.SaveChanges();
+        }
     }
 }

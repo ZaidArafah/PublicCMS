@@ -15,5 +15,8 @@ namespace PublicCMS.Core.Repositories
 
         // spara en ny sida
         void Add(Page page);
+
+        void Delete(int id);
+        void Update(Page editPage);
     }
 }
