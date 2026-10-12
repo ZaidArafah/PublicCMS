@@ -8,12 +8,12 @@ namespace PublicCMS.Core.Repositories
     public interface IPageRepository
     {
         // hämta alla sidor
-        List<Page> GetAllPages();
+        List<Page> GetAll();
 
         // hämta en sida med id
         Page GetById(int id);
 
         // spara en ny sida
-        void AddPage(Page page);
+        void Add(Page page);
     }
 }

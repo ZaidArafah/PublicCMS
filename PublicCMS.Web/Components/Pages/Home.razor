@@ -1,7 +1,28 @@
 ﻿@page "/"
+@using PublicCMS.Core.Models
+@using PublicCMS.Core.Repositories
+@inject IPageRepository PageRepo
 
-<PageTitle>Home</PageTitle>
+<PageTitle>Startsida</PageTitle>
 
-<h1>Hello, world!</h1>
+<h1>Välkommen till min nya hemsida!</h1>
+<p>Här är de sidor som finns publicerade just nu:</p>
 
-Welcome to your new app.
+<div class="list-group mt-4">
+    @foreach (var p in pages)
+    {
+        <a href="/sida/@p.Id" class="list-group-item list-group-item-action">
+            @p.Title
+        </a>
+    }
+</div>
+
+@code {
+    private List<Page> pages = new List<Page>();
+
+    protected override void OnInitialized()
+    {
+        // Hämtar alla sidor från databasen för att bygga länkarna
+        pages = PageRepo.GetAll();
+    }
+}

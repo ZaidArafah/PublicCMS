@@ -16,10 +16,10 @@ namespace PublicCMS.Core.Models
         public string Bodytext { get; set; }
 
         // URL till bild som visas på sidan
-        public string ImageUrl { get; set; }
+        public string ImageUrl { get; set; } = "";
 
         // CSS-stil för sidan
-        public string CssStyle { get; set; }
+        public string CssStyle { get; set; } = "";
 
     }
 }

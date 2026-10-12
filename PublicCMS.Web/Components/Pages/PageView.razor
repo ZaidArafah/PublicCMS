@@ -1,0 +1,31 @@
+﻿@page "/sida/{Id:int}"
+@using PublicCMS.Core.Models
+@using PublicCMS.Core.Repositories
+@inject IPageRepository PageRepo
+
+@if (currentPage == null)
+{
+    <p>Laddar sidan, eller så hittades den inte...</p>
+}
+else
+{
+    <h1>@currentPage.Title</h1>
+
+    <div class="mt-4">
+        <p>@currentPage.Bodytext</p>
+    </div>
+}
+
+@code {
+    // Detta fångar upp siffran från webbadressen
+    [Parameter]
+    public int Id { get; set; }
+
+    private Page currentPage;
+
+    protected override void OnInitialized()
+    {
+        // Hämtar exakt den sida som matchar ID:t
+        currentPage = PageRepo.GetById(Id);
+    }
+}

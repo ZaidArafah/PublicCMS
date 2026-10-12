@@ -1,0 +1,38 @@
+﻿@page "/admin/skapa-sida"
+@using PublicCMS.Core.Models
+@using PublicCMS.Core.Repositories
+@inject IPageRepository PageRepo
+
+
+<h3>Skapa Ny Sida</h3>
+
+<div class="mb-3">
+    <label>Rubrik:</label>
+    <input @bind="newPage.Title" class="form-control"/>
+</div>
+
+
+<div class="mb-3">
+    <label>Text:</label>
+    <textarea @bind="newPage.Bodytext" class="form-control"></textarea>
+</div>
+
+
+<button class="btn btn-primary" @onclick="SavePage">Spara sida</button> 
+
+@if(isSaved)
+{
+    <p class="text-success mt-2">Sidan har sparat i databasen!</p>
+}
+
+@code {
+    private Page newPage = new Page();
+    private bool isSaved = false;
+
+    private void SavePage()
+    {
+        PageRepo.Add(newPage); // Spara sidan i databasen
+        isSaved = true; // visa meddelande om att sidan har sparats
+        newPage = new Page(); // återställ för skapa en ny sida
+    }
+}

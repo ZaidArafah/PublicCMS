@@ -1,0 +1,36 @@
+﻿@page "/admin/sidor"
+@using PublicCMS.Core.Models
+@using PublicCMS.Core.Repositories
+@inject IPageRepository PageRepo
+
+
+
+<h3>Alla Sidor</h3>
+
+<table class="table">
+    <thead>
+        <tr>
+            <th>id</th>
+            <th>Rubrik</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var p in pages)
+        {
+            <tr>
+                <td>@p.Id</td>
+                <td>@p.Title</td>
+            </tr>
+        }
+    </tbody>
+</table>
+
+
+@code {
+    private List<Page> pages = new List<Page>();
+
+    protected override void OnInitialized()
+    {
+        pages = PageRepo.GetAll();
+    }
+}

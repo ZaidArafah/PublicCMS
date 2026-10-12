@@ -16,7 +16,7 @@ namespace PublicCMS.Core.Repositories
             _context = context;
         }
 
-        public List<Page> GetAllPages()
+        public List<Page> GetAll()
         {
             return _context.Pages.ToList();
         }
@@ -26,7 +26,7 @@ namespace PublicCMS.Core.Repositories
             return _context.Pages.FirstOrDefault(p => p.Id == id);
         }
 
-        public void AddPage(Page page)
+        public void Add(Page page)
         {
             _context.Pages.Add(page);
             _context.SaveChanges();
