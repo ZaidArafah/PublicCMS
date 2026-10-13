@@ -3,7 +3,7 @@
 @using PublicCMS.Core.Repositories
 @inject IPageRepository PageRepo
 
-<PageTitle>Startsida</PageTitle>
+<PageTitle>Start sida</PageTitle>
 
 <h1>Välkommen till min nya hemsida!</h1>
 <p>Här är de sidor som finns publicerade just nu:</p>
@@ -22,7 +22,7 @@
 
     protected override void OnInitialized()
     {
-        // Hämtar alla sidor från databasen för att bygga länkarna
-        pages = PageRepo.GetAll();
+        // Hämtar alla sidor, men soterar bort de som inte är publicerade
+        pages = PageRepo.GetAll().Where(p => p.IsPublished == true).ToList();
     }
 }

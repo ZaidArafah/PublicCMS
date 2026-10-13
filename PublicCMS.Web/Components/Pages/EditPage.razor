@@ -18,6 +18,12 @@
         <textarea @bind="editPage.Bodytext" class="form-control"></textarea>
     </div>
 
+
+    <div class="mb-3 form-check">
+        <input type="checkbox" @bind="editPage.IsPublished" class="form-check-input" id="editPub" />
+        <label class="form-check-label" for="editPub">Sidan ska vara publicerad och synlig</label>
+    </div>
+
     <button class="btn btn-success" @onclick="SaveChanges">Spara ändringar</button>
 }
 

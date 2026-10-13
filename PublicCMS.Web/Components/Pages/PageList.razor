@@ -12,6 +12,7 @@
         <tr>
             <th>id</th>
             <th>Rubrik</th>
+            <th>status</th>
         </tr>
     </thead>
     <tbody>
@@ -20,6 +21,16 @@
             <tr>
                 <td>@p.Id</td>
                 <td>@p.Title</td>
+                <td>
+                    @if (p.IsPublished)
+                    {
+                        <span class="badge bg-success">Publicerad</span>
+                    }
+                    else
+                    {
+                        <span class="badge bg-secondary">utkast</span>
+                    }
+                </td>
 
                 <td>
                     <a href="/admin/redigera-sida/@p.Id" class="btn btn-warning btn-sm">Ändra</a>

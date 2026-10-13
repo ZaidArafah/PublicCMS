@@ -21,5 +21,7 @@ namespace PublicCMS.Core.Models
         // CSS-stil för sidan
         public string CssStyle { get; set; } = "";
 
+        public bool IsPublished { get; set; } = true;
+
     }
 }

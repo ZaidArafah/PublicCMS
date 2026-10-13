@@ -2,6 +2,7 @@
 @using PublicCMS.Core.Models
 @using PublicCMS.Core.Repositories
 @inject IPageRepository PageRepo
+@inject IWebHostEnvironment Env
 
 
 <h3>Skapa Ny Sida</h3>
@@ -17,6 +18,15 @@
     <textarea @bind="newPage.Bodytext" class="form-control"></textarea>
 </div>
 
+<div class="mb-3 form-check">
+    <input type="checkbox" @bind="newPage.IsPublished" class="form-check-input" id="ispub"/>
+    <label class="form-check-label" for="ispub">sidan ska vara publicerad och synlig för användare</label>
+</div>
+
+<div class="mb-3">
+    <label>ladda upp en Bild:</label>
+    <InputFile OnChange="LaddaUppBild" class="form-control" />
+</div>
 
 <button class="btn btn-primary" @onclick="SavePage">Spara sida</button> 
 
@@ -34,5 +44,20 @@
         PageRepo.Add(newPage); // Spara sidan i databasen
         isSaved = true; // visa meddelande om att sidan har sparats
         newPage = new Page(); // återställ för skapa en ny sida
+    }
+
+
+    private async Task LaddaUppBild(InputFileChangeEventArgs e)
+    {
+        var fil = e.File;
+
+        var filnamn = fil.Name;
+        var sökväg = Path.Combine(Env.WebRootPath, "images", filnamn);
+
+
+        using var stream = new FileStream(sökväg, FileMode.Create);
+        await fil.OpenReadStream(1024 * 1024 * 5).CopyToAsync(stream);
+
+        newPage.ImageUrl = $"/images/{filnamn}"; 
     }
 }
