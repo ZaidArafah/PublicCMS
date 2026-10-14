@@ -1,0 +1,66 @@
+﻿@page "/registrera"
+@using System.IO
+@using PublicCMS.Core.Models
+@using PublicCMS.Core.Repositories
+@using PublicCMS.Web.Repositories
+@inject IUserRepository UserRepo
+@inject IWebHostEnvironment Env
+@inject NavigationManager NavManager
+
+<div class="row mt-5">
+    <div class="col-md-6 offset-md-3 card p-4">
+        <h3>Skapa ett konto</h3>
+        <p>Registrera dig för att kunna skriva inlägg i forumet.</p>
+
+        <div class="mb-3">
+            <label>Välj ett användarnamn:</label>
+            <input @bind="newUser.Username" class="form-control" />
+        </div>
+
+        <div class="mb-3">
+            <label>Välj ett lösenord:</label>
+            <input type="password" @bind="newUser.PasswordHash" class="form-control" />
+        </div>
+
+        <div class="mb-3">
+            <label>Ladda upp en profilbild (Frivilligt):</label>
+            <InputFile OnChange="LaddaUppProfilbild" class="form-control" />
+        </div>
+
+        <!-- Om man har laddat upp en bild, visar vi en liten förhandsgranskning -->
+        @if (!string.IsNullOrEmpty(newUser.ProfileImageUrl))
+        {
+            <div class="mb-3 text-center">
+                <img src="@newUser.ProfileImageUrl" alt="Din profilbild" style="width: 100px; height: 100px; object-fit: cover; border-radius: 50%;" />
+            </div>
+        }
+
+        <button class="btn btn-success" @onclick="RegistreraKonto">Registrera dig</button>
+    </div>
+</div>
+
+@code {
+    private AppUser newUser = new AppUser();
+
+    private async Task LaddaUppProfilbild(InputFileChangeEventArgs e)
+    {
+        var fil = e.File;
+       
+        var filnamn = Guid.NewGuid().ToString() + "-" + fil.Name;
+        var sökväg = Path.Combine(Env.WebRootPath, "images", filnamn);
+
+        using var stream = new FileStream(sökväg, FileMode.Create);
+        await fil.OpenReadStream(1024 * 1024 * 5).CopyToAsync(stream); 
+
+        newUser.ProfileImageUrl = $"/images/{filnamn}";
+    }
+
+    private void RegistreraKonto()
+    {
+        // Sparar den nya användaren i databasen
+        UserRepo.Add(newUser);
+
+        // Skickar användaren till inloggningssidan
+        NavManager.NavigateTo("/login");
+    }
+}

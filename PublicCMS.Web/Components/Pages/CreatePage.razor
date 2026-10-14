@@ -3,6 +3,8 @@
 @using PublicCMS.Core.Repositories
 @inject IPageRepository PageRepo
 @inject IWebHostEnvironment Env
+@using Microsoft.AspNetCore.Authorization
+@attribute [Authorize]
 
 
 <h3>Skapa Ny Sida</h3>

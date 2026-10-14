@@ -1,0 +1,21 @@
+﻿@page "/login"
+
+<div class="row mt-5">
+    <div class="col-md-6 offset-md-3">
+        <h3>Logga in</h3>
+        <p>Du måste vara inloggad för att hantera sidorna.</p>
+
+        <!-- Ett vanligt webbformulär som skickar datan till vår säkerhetskod -->
+        <form action="/api/login" method="post">
+            <div class="mb-3">
+                <label>Användarnamn:</label>
+                <input type="text" name="username" class="form-control" />
+            </div>
+            <div class="mb-3">
+                <label>Lösenord:</label>
+                <input type="password" name="password" class="form-control" />
+            </div>
+            <button type="submit" class="btn btn-primary">Logga in</button>
+        </form>
+    </div>
+</div>
