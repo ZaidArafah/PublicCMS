@@ -15,6 +15,10 @@ namespace PublicCMS.Core.Data
         public DbSet<Page> Pages { get; set; }
 
         public DbSet<MenuItem> MenuItems { get; set; }
+
+        public DbSet<Category> Categories { get; set; }
+
+        public DbSet<AppUser> Users { get; set; }
     }
 }
  
