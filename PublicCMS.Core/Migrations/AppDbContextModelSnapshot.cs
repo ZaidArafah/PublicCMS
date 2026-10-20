@@ -227,11 +227,11 @@ namespace PublicCMS.Core.Migrations
 
             modelBuilder.Entity("PublicCMS.Core.Models.ReportedPost", b =>
                 {
-                    b.Property<int>("id")
+                    b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("int");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("id"));
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
                     b.Property<int>("ForumPostId")
                         .HasColumnType("int");
@@ -247,7 +247,7 @@ namespace PublicCMS.Core.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.HasKey("id");
+                    b.HasKey("Id");
 
                     b.ToTable("ReportedPosts");
                 });
