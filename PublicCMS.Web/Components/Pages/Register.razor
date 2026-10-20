@@ -45,12 +45,17 @@
     private async Task LaddaUppProfilbild(InputFileChangeEventArgs e)
     {
         var fil = e.File;
-       
+   
         var filnamn = Guid.NewGuid().ToString() + "-" + fil.Name;
-        var sökväg = Path.Combine(Env.WebRootPath, "images", filnamn);
+    
+        // LÄGG TILL DESSA TVÅ RADER:
+        var mappSökväg = Path.Combine(Env.WebRootPath, "images");
+        Directory.CreateDirectory(mappSökväg);
+
+        var sökväg = Path.Combine(mappSökväg, filnamn); // Använd mappSökväg här
 
         using var stream = new FileStream(sökväg, FileMode.Create);
-        await fil.OpenReadStream(1024 * 1024 * 5).CopyToAsync(stream); 
+        await fil.OpenReadStream(1024 * 1024 * 5).CopyToAsync(stream);
 
         newUser.ProfileImageUrl = $"/images/{filnamn}";
     }

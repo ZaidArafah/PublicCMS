@@ -1,0 +1,115 @@
+﻿@page "/redigera-inlagg/{Id:int}"
+@using Microsoft.AspNetCore.Components.Authorization
+@using PublicCMS.Core.Models
+@using PublicCMS.Core.Repositories
+@using PublicCMS.Web.Repositories
+@inject IForumPostRepository PostRepo
+@inject NavigationManager Navigation
+@inject AuthenticationStateProvider AuthStateProvider
+@using System.IO
+@inject IWebHostEnvironment Env
+
+<div class="container mt-4" style="max-width: 600px;">
+    <h3>Redigera inlägg</h3>
+
+    @if (post == null)
+    {
+        <p>Laddar inlägg...</p>
+    }
+    else
+    {
+        <div class="card p-4 shadow-sm bg-light">
+            <div class="mb-3">
+                <label class="form-label fw-bold">Rubrik:</label>
+                <input @bind="post.Title" class="form-control" />
+            </div>
+            
+            <div class="mb-3">
+                <label class="form-label fw-bold">Meddelande:</label>
+                <textarea @bind="post.Content" class="form-control" rows="5"></textarea>
+            </div>
+
+            <div class="mb-3">
+                <label class="form-label fw-bold">Byt bild (Frivilligt):</label>
+                <InputFile OnChange="LaddaUppNyBild" class="form-control" />
+            </div>
+
+            @if (!string.IsNullOrEmpty(post.ImageUrl))
+            {
+                <div class="mb-3 text-center">
+                    <img src="@post.ImageUrl" alt="Nuvarande bild" style="max-width: 100%; max-height: 200px; border-radius: 8px;" />
+                </div>
+            }
+
+            <div class="d-flex justify-content-between mt-3">
+                <button class="btn btn-success" @onclick="SparaÄndringar">Spara ändringar</button>
+                <button class="btn btn-secondary" @onclick="Avbryt">Avbryt</button>
+            </div>
+        </div>
+    }
+</div>
+
+@code {
+    [Parameter]
+    public int Id { get; set; }
+
+    private ForumPost? post;
+
+    protected override async Task OnInitializedAsync()
+    {
+        post = PostRepo.GetById(Id);
+
+        // Säkerhetskontroll: Om inlägget inte finns, eller om inloggad användare INTE är ägaren (och inte heller admin), skicka bort dem!
+        var authState = await AuthStateProvider.GetAuthenticationStateAsync();
+        var user = authState.User;
+
+        if (post == null || user.Identity == null || !user.Identity.IsAuthenticated)
+        {
+            Navigation.NavigateTo("/forum");
+            return;
+        }
+
+        bool isAdmin = user.IsInRole("Admin");
+        if (!isAdmin && post.AuthorName != user.Identity.Name)
+        {
+            Navigation.NavigateTo("/forum"); // Får inte redigera någon annans inlägg
+        }
+    }
+
+    private async Task LaddaUppNyBild(InputFileChangeEventArgs e)
+    {
+        var fil = e.File;
+        var filnamn = Guid.NewGuid().ToString() + Path.GetExtension(fil.Name);
+        
+        var mappSökväg = Path.Combine(Env.WebRootPath, "images");
+        Directory.CreateDirectory(mappSökväg);
+        var sökväg = Path.Combine(mappSökväg, filnamn);
+
+        using var stream = new FileStream(sökväg, FileMode.Create);
+        await fil.OpenReadStream(1024 * 1024 * 5).CopyToAsync(stream);
+
+        post!.ImageUrl = $"/images/{filnamn}";
+    }
+
+    private void SparaÄndringar()
+    {
+        if (post != null)
+        {
+            PostRepo.Update(post);
+            // Skicka tillbaka användaren till kategorin (eller föregående sida)
+            Navigation.NavigateTo($"/kategori/{post.CategoryId}");
+        }
+    }
+
+    private void Avbryt()
+    {
+        if (post != null)
+        {
+            Navigation.NavigateTo($"/kategori/{post.CategoryId}");
+        }
+        else
+        {
+            Navigation.NavigateTo("/forum");
+        }
+    }
+}

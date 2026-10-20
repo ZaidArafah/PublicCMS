@@ -6,5 +6,7 @@ namespace PublicCMS.Web.Repositories
     {
         void Add(Category category);
         List<Category> GetAll();
+
+        void Delete(int id);
     }
 }

@@ -19,6 +19,12 @@ namespace PublicCMS.Core.Data
         public DbSet<Category> Categories { get; set; }
 
         public DbSet<AppUser> Users { get; set; }
+
+        public DbSet<ForumPost> ForumPosts { get; set; }
+
+        public DbSet<ForumComment> ForumComments { get; set; }
+
+        public DbSet<PrivateMessage> PrivateMessages { get; set; }
     }
 }
  

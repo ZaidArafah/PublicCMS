@@ -26,13 +26,21 @@ namespace PublicCMS.Web
 
             builder.Services.AddScoped<IPageRepository, PageRepository>();
 
+            builder.Services.AddScoped<IForumPostRepository, ForumPostRepository>();
+
+            builder.Services.AddScoped<ICategoryRepository, CategoryRepository>();
+
+            builder.Services.AddScoped<IPrivateMessageRepository, PrivateMessageRepository>();
+
             builder.Services.AddAuthentication(Microsoft.AspNetCore.Authentication.Cookies.CookieAuthenticationDefaults.AuthenticationScheme)
              .AddCookie(options =>
             {
-              options.LoginPath = "/login";
+                options.LoginPath = "/login";
             });
-           
-            
+
+
+            builder.Services.AddScoped<IForumCommentRepository, ForumCommentRepository>();
+
             builder.Services.AddCascadingAuthenticationState();
 
 
@@ -51,6 +59,8 @@ namespace PublicCMS.Web
 
             app.UseAntiforgery();
 
+            app.UseStaticFiles();
+
             app.MapStaticAssets();
             app.MapRazorComponents<App>()
                 .AddInteractiveServerRenderMode();
@@ -58,44 +68,58 @@ namespace PublicCMS.Web
             app.UseAuthentication();
             app.UseAuthorization();
 
+
+
             app.MapPost("/api/login", async (HttpContext ctx, PublicCMS.Core.Repositories.IUserRepository userRepo) =>
             {
                 var form = await ctx.Request.ReadFormAsync();
                 string username = form["username"].ToString();
                 string password = form["password"].ToString();
 
-                // 1. Släpp alltid in Admin till admin-sidorna (som förut)
+                //  Släpp in den inbyggda Admin till admin-sidorna
                 if (username == "admin" && password == "1234")
                 {
                     var adminClaims = new List<System.Security.Claims.Claim> {
-            new System.Security.Claims.Claim(System.Security.Claims.ClaimTypes.Name, "admin")
+            new System.Security.Claims.Claim(System.Security.Claims.ClaimTypes.Name, "admin"),
+            new System.Security.Claims.Claim(System.Security.Claims.ClaimTypes.Role, "Admin") // Ger admin-rättigheter
         };
                     var adminIdentity = new System.Security.Claims.ClaimsIdentity(adminClaims, "Cookies");
                     await Microsoft.AspNetCore.Authentication.AuthenticationHttpContextExtensions.SignInAsync(ctx, "Cookies", new System.Security.Claims.ClaimsPrincipal(adminIdentity));
+
                     ctx.Response.Redirect("/admin/kategorier");
                     return;
                 }
 
-                // 2. Kolla databasen om en vanlig användare försöker logga in
+                // Kolla databasen om en vanlig användare (eller databas-admin) försöker logga in
                 var user = userRepo.GetByUsername(username);
                 if (user != null && user.PasswordHash == password)
                 {
                     var userClaims = new List<System.Security.Claims.Claim> {
             new System.Security.Claims.Claim(System.Security.Claims.ClaimTypes.Name, user.Username),
-            new System.Security.Claims.Claim("ProfileImage", user.ProfileImageUrl ?? "") // Vi sparar bilden i ID-kortet!
-        };
+            new System.Security.Claims.Claim("ProfileImage", user.ProfileImageUrl ?? "")
+        }; 
+
+                    // Om användaren i databasen heter "admin", ge dem administratörsrättigheter
+                    if (user.Username.ToLower() == "admin")
+                    {
+                        userClaims.Add(new System.Security.Claims.Claim(System.Security.Claims.ClaimTypes.Role, "Admin"));
+                    }
+
                     var userIdentity = new System.Security.Claims.ClaimsIdentity(userClaims, "Cookies");
                     await Microsoft.AspNetCore.Authentication.AuthenticationHttpContextExtensions.SignInAsync(ctx, "Cookies", new System.Security.Claims.ClaimsPrincipal(userIdentity));
 
-                    ctx.Response.Redirect("/"); // Skicka vanliga användare till startsidan
+                    ctx.Response.Redirect("/"); 
                     return;
                 }
 
-                // 3. Om fel lösenord eller om användaren inte finns
                 ctx.Response.Redirect("/login");
             }).DisableAntiforgery();
 
-
+            app.MapGet("/api/logout", async (HttpContext ctx) =>
+            {
+                await Microsoft.AspNetCore.Authentication.AuthenticationHttpContextExtensions.SignOutAsync(ctx, "Cookies");
+                ctx.Response.Redirect("/");
+            });
 
             app.Run();
         }

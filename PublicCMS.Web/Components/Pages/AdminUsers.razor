@@ -1,0 +1,87 @@
+﻿@page "/admin/anvandare"
+@using PublicCMS.Core.Models
+@using PublicCMS.Core.Repositories
+@inject IUserRepository UserRepo
+@using Microsoft.AspNetCore.Authorization
+@* Skyddar sidan så att enbart användare med rollen Admin kommer in *@
+@attribute [Authorize(Roles = "Admin")]
+
+<h3>Hantera Användare</h3>
+
+@if (users == null)
+{
+    <p>Laddar användare...</p>
+}
+else if (users.Count == 0)
+{
+    <p>Inga användare hittades.</p>
+}
+else
+{
+    <table class="table mt-4 shadow-sm">
+        <thead class="table-dark">
+            <tr>
+                <th>ID</th>
+                <th>Profilbild</th>
+                <th>Användarnamn</th>
+                <th>Åtgärder</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var user in users)
+            {
+                <tr>
+                    <td class="align-middle">@user.Id</td>
+                    <td class="align-middle">
+                        @if (!string.IsNullOrEmpty(user.ProfileImageUrl))
+                        {
+                            <img src="@user.ProfileImageUrl" alt="Profilbild" style="width: 40px; height: 40px; object-fit: cover; border-radius: 50%;" />
+                        }
+                        else
+                        {
+                            <span class="bi bi-person-circle" style="font-size: 2rem; color: #ccc;"></span>
+                        }
+                    </td>
+                    <td class="align-middle fw-bold">@user.Username</td>
+                    <td class="align-middle">
+                        @* Vi lägger in en spärr så att man inte råkar radera huvud-admin *@
+                        @if (user.Username.ToLower() == "admin")
+                        {
+                            <span class="badge bg-secondary">System-admin (Krävs)</span>
+                        }
+                        else
+                        {
+                            <button class="btn btn-danger btn-sm" @onclick="() => TaBortAnvandare(user.Id)">
+                                <i class="bi bi-trash"></i> Ta bort
+                            </button>
+                        }
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+
+@code {
+    private List<AppUser> users;
+
+    protected override void OnInitialized()
+    {
+        LaddaAnvandare();
+    }
+
+    private void LaddaAnvandare()
+    {
+        // Hämtar alla användare från databasen
+        users = UserRepo.GetAll();
+    }
+
+    private void TaBortAnvandare(int id)
+    {
+        // Ta bort användaren från databasen
+        UserRepo.Delete(id);
+        
+        // Ladda om listan så att den uppdateras direkt på skärmen
+        LaddaAnvandare();
+    }
+}

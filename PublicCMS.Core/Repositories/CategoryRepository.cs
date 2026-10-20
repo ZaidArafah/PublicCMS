@@ -22,5 +22,15 @@ namespace PublicCMS.Web.Repositories
         {
             return _context.Categories.ToList();
         }
+
+        public void Delete(int id)
+        {
+            var category = _context.Categories.Find(id); // Leta upp kategorin via ID
+            if (category != null)
+            {
+                _context.Categories.Remove(category);
+                _context.SaveChanges();
+            }
+        }
     }
 }

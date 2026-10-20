@@ -1,48 +1,85 @@
 ﻿@page "/admin/kategorier"
 @using PublicCMS.Core.Models
+@using PublicCMS.Core.Repositories
 @using PublicCMS.Web.Repositories
 @inject ICategoryRepository CategoryRepo
 @using Microsoft.AspNetCore.Authorization
-@attribute [Authorize]
+@attribute [Authorize(Roles = "Admin")]
 
-<h3>Hantera Forumkategorier</h3>
+<h3>Hantera Forumkategorier (Övergripande ämnen)</h3>
 
-<div class="card mb-4 p-3">
-    <h4>Skapa nytt övergripande ämne</h4>
+<div class="card mb-4 p-3 bg-light shadow-sm border-primary">
+    <h5>Skapa ett nytt huvudämne</h5>
     <div class="mb-2">
-        <label>Rubrik (t.ex. Fordonssnack):</label>
-        <input @bind="newCategory.Name" class="form-control" />
+        <label>Ämnets namn (Rubrik):</label>
+        <input @bind="newCategory.Name" class="form-control" placeholder="T.ex. 'Allmänt snack', 'Spel', 'Programmering'" />
     </div>
     <div class="mb-2">
-        <label>Beskrivning (Frivillig):</label>
-        <input @bind="newCategory.Description" class="form-control" />
+        <label>Kort beskrivning:</label>
+        <input @bind="newCategory.Description" class="form-control" placeholder="Vad handlar det här ämnet om?" />
     </div>
-    <button class="btn btn-primary" @onclick="SaveCategory">Spara ämne</button>
+    <button class="btn btn-success mt-2" @onclick="SparaKategori">Skapa kategori</button>
 </div>
 
 <h4>Befintliga ämnen</h4>
-<ul class="list-group">
-    @foreach (var c in categories)
-    {
-        <li class="list-group-item">
-            <strong>@c.Name</strong> - @c.Description
-        </li>
-    }
-</ul>
+@if (categories == null || categories.Count == 0)
+{
+    <p>Inga kategorier har skapats ännu.</p>
+}
+else
+{
+    <table class="table shadow-sm">
+        <thead class="table-dark">
+            <tr>
+                <th>ID</th>
+                <th>Namn</th>
+                <th>Beskrivning</th>
+                <th>Åtgärder</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var cat in categories)
+            {
+                <tr>
+                    <td class="align-middle">@cat.Id</td>
+                    <td class="align-middle fw-bold">@cat.Name</td>
+                    <td class="align-middle">@cat.Description</td>
+                    <td class="align-middle">
+                        <button class="btn btn-danger btn-sm" @onclick="() => TaBortKategori(cat.Id)">Ta bort</button>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
 
 @code {
-    private Category newCategory = new Category();
     private List<Category> categories = new List<Category>();
+    private Category newCategory = new Category();
 
     protected override void OnInitialized()
+    {
+        LaddaKategorier();
+    }
+
+    private void LaddaKategorier()
     {
         categories = CategoryRepo.GetAll();
     }
 
-    private void SaveCategory()
+    private void SparaKategori()
     {
-        CategoryRepo.Add(newCategory);
-        newCategory = new Category(); // för återställer formuläret
-        categories = CategoryRepo.GetAll(); //det för Ladda om listan så det nya ämnet syns
+        if (!string.IsNullOrWhiteSpace(newCategory.Name))
+        {
+            CategoryRepo.Add(newCategory);
+            newCategory = new Category(); // Töm formuläret
+            LaddaKategorier(); // Uppdatera listan
+        }
+    }
+
+    private void TaBortKategori(int id)
+    {
+        CategoryRepo.Delete(id);
+        LaddaKategorier();
     }
 }

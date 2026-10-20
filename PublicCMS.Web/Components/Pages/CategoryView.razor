@@ -1,0 +1,203 @@
+﻿@page "/kategori/{Id:int}"
+@using Microsoft.AspNetCore.Components.Authorization
+@using PublicCMS.Core.Models
+@using PublicCMS.Core.Repositories
+@using PublicCMS.Web.Repositories
+@inject ICategoryRepository CategoryRepo
+@inject IForumPostRepository PostRepo
+@inject AuthenticationStateProvider AuthStateProvider
+@using System.IO
+@inject IWebHostEnvironment Env
+
+@if (category == null)
+{
+    <p>Laddar...</p>
+}
+else
+{
+    <div class="container mt-4">
+        <h2>@category.Name</h2>
+        <p class="text-muted">@category.Description</p>
+        <hr />
+
+        <div class="row">
+            <!-- Vänster sida: Listan med inlägg -->
+            <div class="col-md-8">
+                <h4>Diskussioner</h4>
+                @if (posts.Count == 0)
+                {
+                    <div class="alert alert-secondary">Inga inlägg ännu. Bli först med att skriva!</div>
+                }
+                else
+                {
+                    @foreach (var post in posts)
+                    {
+                        <div class="card mb-3 shadow-sm">
+                            <div class="card-body d-flex">
+                                <!-- Författarens bild och namn -->
+                                <div class="me-3 text-center" style="width: 100px;">
+                                    @if (!string.IsNullOrEmpty(post.AuthorProfileImageUrl))
+                                    {
+                                        <img src="@post.AuthorProfileImageUrl" style="width: 60px; height: 60px; border-radius: 50%; object-fit: cover;" />
+                                    }
+                                    else
+                                    {
+                                        <span class="bi bi-person-circle" style="font-size: 3rem; color: #ccc;"></span>
+                                    }
+                                    <small class="d-block mt-1 fw-bold text-break">@post.AuthorName</small>
+                                </div>
+                                
+                                <!-- Själva inlägget -->
+                                <div class="flex-grow-1">
+                                    <small class="text-muted float-end">@post.CreatedAt.ToString("yyyy-MM-dd HH:mm")</small>
+                                    <a href="/inlagg/@post.Id" class="text-decoration-none">
+                                        <h5 class="card-title text-primary">@post.Title</h5>
+                                    </a>
+                                    <p class="card-text">@post.Content</p>
+
+                                    <!-- HÄR ÄR KNAPPARNA FÖR REDIGERA / TA BORT -->
+                                    <div class="mt-2">
+                                        @if (currentUserName == post.AuthorName)
+                                        {
+                                            <a href="/redigera-inlagg/@post.Id" class="btn btn-sm btn-outline-primary me-2">
+                                                <i class="bi bi-pencil"></i> Redigera
+                                            </a>
+                                        }
+
+                                        @if (isAdmin || currentUserName == post.AuthorName)
+                                        {
+                                            <button class="btn btn-sm btn-outline-danger" @onclick="() => TaBortInlagg(post.Id)">
+                                                <i class="bi bi-trash"></i> Ta bort
+                                            </button>
+                                        }
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    }
+                }
+            </div>
+
+            <!-- Höger sida: Skapa inlägg -->
+            <div class="col-md-4">
+                <AuthorizeView>
+                    <Authorized>
+                        <div class="card p-3 bg-light shadow-sm border-primary">
+                            <h5>Skriv ett nytt inlägg</h5>
+                            <div class="mb-2">
+                                <label>Rubrik:</label>
+                                <input @bind="newPost.Title" class="form-control" />
+                            </div>
+                            <div class="mb-3">
+                                <label>Meddelande:</label>
+                                <textarea @bind="newPost.Content" class="form-control" rows="4"></textarea>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <label>Bifoga en bild (Frivilligt):</label>
+                                <InputFile OnChange="LaddaUppBild" class="form-control" />
+                            </div>
+
+                            @if (!string.IsNullOrEmpty(newPost.ImageUrl))
+                            {
+                                <div class="mb-3 text-center">
+                                    <img src="@newPost.ImageUrl" alt="Förhandsgranskning" style="max-width: 100%; border-radius: 8px;" />
+                                </div>
+                            }
+                           
+                            <button class="btn btn-primary w-100" @onclick="SparaInlagg">Publicera inlägg</button>
+                        </div>
+                    </Authorized>
+                    <NotAuthorized>
+                        <div class="alert alert-warning">
+                            Du måste <a href="/login">logga in</a> för att skapa ett inlägg.
+                        </div>
+                    </NotAuthorized>
+                </AuthorizeView>
+            </div>
+        </div>
+    </div>
+}
+
+@code {
+    [Parameter]
+    public int Id { get; set; }
+
+    private Category? category;
+    private List<ForumPost> posts = new List<ForumPost>();
+    private ForumPost newPost = new ForumPost();
+
+    // Nya variabler för att hålla koll på rättigheter
+    private string currentUserName = "";
+    private bool isAdmin = false;
+
+    // Ändrad till async för att vi ska kunna kontrollera vem som är inloggad direkt när sidan laddas
+    protected override async Task OnParametersSetAsync()
+    {
+        category = CategoryRepo.GetAll().FirstOrDefault(c => c.Id == Id);
+        LaddaInlagg();
+
+        var authState = await AuthStateProvider.GetAuthenticationStateAsync();
+        if (authState.User.Identity != null && authState.User.Identity.IsAuthenticated)
+        {
+            currentUserName = authState.User.Identity.Name ?? "";
+            isAdmin = authState.User.IsInRole("Admin");
+        }
+    }
+
+    private void LaddaInlagg()
+    {
+        posts = PostRepo.GetPostsByCategory(Id);
+    }
+
+    // NY METOD: Ta bort inlägg
+    private void TaBortInlagg(int id)
+    {
+        PostRepo.Delete(id);
+        LaddaInlagg(); // Ladda om listan direkt så att inlägget försvinner från skärmen
+    }
+
+    private async Task SparaInlagg()
+    {
+        if (string.IsNullOrWhiteSpace(newPost.Title) || string.IsNullOrWhiteSpace(newPost.Content))
+        {
+            return;
+        }
+
+        var authState = await AuthStateProvider.GetAuthenticationStateAsync();
+        var user = authState.User;
+
+        if (user.Identity != null && user.Identity.IsAuthenticated)
+        {
+            newPost.CategoryId = Id;
+            newPost.AuthorName = user.Identity.Name ?? "Okänd";
+            
+            var imageClaim = user.Claims.FirstOrDefault(c => c.Type == "ProfileImage");
+            if (imageClaim != null)
+            {
+                newPost.AuthorProfileImageUrl = imageClaim.Value;
+            }
+
+            newPost.CreatedAt = DateTime.Now;
+
+            PostRepo.Add(newPost);
+            newPost = new ForumPost();
+            LaddaInlagg();
+        }
+    }
+
+    private async Task LaddaUppBild(InputFileChangeEventArgs e)
+    {
+        var fil = e.File;
+        var filnamn = Guid.NewGuid().ToString() + Path.GetExtension(fil.Name);
+        
+        var mappSökväg = Path.Combine(Env.WebRootPath, "images");
+        Directory.CreateDirectory(mappSökväg);
+        var sökväg = Path.Combine(mappSökväg, filnamn);
+
+        using var stream = new FileStream(sökväg, FileMode.Create);
+        await fil.OpenReadStream(1024 * 1024 * 5).CopyToAsync(stream);
+
+        newPost.ImageUrl = $"/images/{filnamn}";
+    }
+}

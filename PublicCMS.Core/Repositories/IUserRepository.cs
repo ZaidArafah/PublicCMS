@@ -9,5 +9,9 @@ namespace PublicCMS.Core.Repositories
     {
         void Add(AppUser user);
         AppUser GetByUsername(string username);
+
+        List<AppUser> GetAll();
+
+        void Delete(int id);
     }
 }

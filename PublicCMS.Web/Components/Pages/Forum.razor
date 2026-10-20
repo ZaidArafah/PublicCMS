@@ -1,0 +1,46 @@
+﻿@page "/forum"
+@using PublicCMS.Core.Models
+@using PublicCMS.Core.Repositories
+@using PublicCMS.Web.Repositories
+@inject ICategoryRepository CategoryRepo
+
+<div class="container mt-4">
+    <h2 class="mb-4">Diskussionsforum</h2>
+    <p>Välj ett ämne nedan för att läsa trådar eller skapa ett eget inlägg!</p>
+
+    @if (categories == null || categories.Count == 0)
+    {
+        <div class="alert alert-info shadow-sm">Admin har inte skapat några ämnen ännu. Kom tillbaka senare!</div>
+    }
+    else
+    {
+        <div class="row">
+            @foreach (var cat in categories)
+            {
+                <div class="col-md-6 mb-3">
+                    <div class="card shadow-sm h-100 border-primary" style="transition: transform 0.2s;">
+                        <div class="card-body">
+                            <h4 class="card-title text-primary">@cat.Name</h4>
+                            <p class="card-text text-muted">@cat.Description</p>
+                            
+                            <!-- Denna länk tar användaren till din befintliga CategoryView.razor! -->
+                            <a href="/kategori/@cat.Id" class="btn btn-outline-primary mt-2">
+                                Gå till ämnet & Skriv inlägg <i class="bi bi-arrow-right"></i>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+    }
+</div>
+
+@code {
+    private List<Category> categories = new List<Category>();
+
+    protected override void OnInitialized()
+    {
+        // Hämtar alla forumkategorier så besökarna kan se dem
+        categories = CategoryRepo.GetAll();
+    }
+}

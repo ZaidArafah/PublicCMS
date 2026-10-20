@@ -1,0 +1,152 @@
+﻿@page "/inlagg/{Id:int}"
+@using Microsoft.AspNetCore.Components.Authorization
+@using PublicCMS.Core.Models
+@using PublicCMS.Core.Repositories
+@using PublicCMS.Web.Repositories
+@inject IForumPostRepository PostRepo
+@inject IForumCommentRepository CommentRepo
+@inject AuthenticationStateProvider AuthStateProvider
+
+@if (post == null)
+{
+    <p>Laddar inlägg...</p>
+}
+else
+{
+    <div class="container mt-4">
+        <!-- Tillbaka-knapp -->
+        <a href="/kategori/@post.CategoryId" class="btn btn-outline-secondary mb-3">
+            <span class="bi bi-arrow-left"></span> Tillbaka
+        </a>
+
+        <!-- Huvudinlägget -->
+        <div class="card mb-4 border-primary shadow-sm">
+            <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
+                <h3 class="mb-0 fs-4">@post.Title</h3>
+                <small>@post.CreatedAt.ToString("yyyy-MM-dd HH:mm")</small>
+            </div>
+            <div class="card-body d-flex">
+                <div class="me-3 text-center" style="width: 100px;">
+                    @if (!string.IsNullOrEmpty(post.AuthorProfileImageUrl))
+                    {
+                        <img src="@post.AuthorProfileImageUrl" style="width: 60px; height: 60px; border-radius: 50%; object-fit: cover;" />
+                    }
+                    else
+                    {
+                        <span class="bi bi-person-circle" style="font-size: 3rem; color: #ccc;"></span>
+                    }
+                    <small class="d-block mt-1 fw-bold text-break">@post.AuthorName</small>
+                </div>
+                <div class="flex-grow-1">
+                    <p class="card-text fs-5" style="white-space: pre-wrap;">@post.Content</p>
+                </div>
+                @if (!string.IsNullOrEmpty(post.ImageUrl))
+                {
+                    <div class="mt-3 mb-3">
+                        <img src="@post.ImageUrl" alt="Inläggsbild" class="img-fluid rounded shadow-sm" style="max-height: 400px;" />
+                    </div>
+                }
+            </div>
+        </div>
+
+        <!-- Kommentarer (Tråden) -->
+        <h4 class="mb-3">Kommentarer (@comments.Count)</h4>
+        
+        @if (comments.Count == 0)
+        {
+            <div class="alert alert-secondary">Inga kommentarer ännu. Bli den första att svara!</div>
+        }
+        else
+        {
+            @foreach (var comment in comments)
+            {
+                <div class="card mb-2 shadow-sm ms-4 ms-md-5 border-start border-4 border-success">
+                    <div class="card-body d-flex p-3">
+                        <div class="me-3 text-center" style="width: 80px;">
+                            @if (!string.IsNullOrEmpty(comment.AuthorProfileImageUrl))
+                            {
+                                <img src="@comment.AuthorProfileImageUrl" style="width: 45px; height: 45px; border-radius: 50%; object-fit: cover;" />
+                            }
+                            else
+                            {
+                                <span class="bi bi-person-circle" style="font-size: 2.5rem; color: #ccc;"></span>
+                            }
+                            <small class="d-block mt-1 fw-bold text-break">@comment.AuthorName</small>
+                        </div>
+                        <div class="flex-grow-1">
+                            <small class="text-muted float-end">@comment.CreatedAt.ToString("yyyy-MM-dd HH:mm")</small>
+                            <p class="card-text mt-1" style="white-space: pre-wrap;">@comment.Content</p>
+                        </div>
+                    </div>
+                </div>
+            }
+        }
+
+        <!-- Skriv en ny kommentar -->
+        <div class="card mt-4 mb-5 bg-light ms-4 ms-md-5 border-secondary shadow-sm">
+            <div class="card-body">
+                <AuthorizeView>
+                    <Authorized>
+                        <h5 class="mb-3">Svara i tråden</h5>
+                        <div class="mb-3">
+                            <textarea @bind="newComment.Content" class="form-control" rows="3" placeholder="Skriv din kommentar här..."></textarea>
+                        </div>
+                        <button class="btn btn-success" @onclick="SparaKommentar">Skicka kommentar</button>
+                    </Authorized>
+                    <NotAuthorized>
+                        <div class="alert alert-warning mb-0">
+                            Du måste <a href="/login">logga in</a> för att kunna svara i tråden.
+                        </div>
+                    </NotAuthorized>
+                </AuthorizeView>
+            </div>
+        </div>
+    </div>
+}
+
+@code {
+    [Parameter]
+    public int Id { get; set; }
+
+    private ForumPost? post;
+    private List<ForumComment> comments = new List<ForumComment>();
+    private ForumComment newComment = new ForumComment();
+
+    protected override void OnParametersSet()
+    {
+        post = PostRepo.GetById(Id);
+        LaddaKommentarer();
+    }
+
+    private void LaddaKommentarer()
+    {
+        comments = CommentRepo.GetCommentsByPost(Id);
+    }
+
+    private async Task SparaKommentar()
+    {
+        if (string.IsNullOrWhiteSpace(newComment.Content)) return;
+
+        var authState = await AuthStateProvider.GetAuthenticationStateAsync();
+        var user = authState.User;
+
+        if (user.Identity != null && user.Identity.IsAuthenticated)
+        {
+            newComment.ForumPostId = Id;
+            newComment.AuthorName = user.Identity.Name ?? "Okänd";
+            
+            var imageClaim = user.Claims.FirstOrDefault(c => c.Type == "ProfileImage");
+            if (imageClaim != null)
+            {
+                newComment.AuthorProfileImageUrl = imageClaim.Value;
+            }
+
+            newComment.CreatedAt = DateTime.Now;
+
+            CommentRepo.Add(newComment);
+
+            newComment = new ForumComment(); // Töm formuläret
+            LaddaKommentarer(); // Ladda om listan direkt
+        }
+    }
+}

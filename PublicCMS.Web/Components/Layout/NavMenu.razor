@@ -1,7 +1,8 @@
 ﻿@using PublicCMS.Core.Repositories
 @using PublicCMS.Core.Models
+@using Microsoft.AspNetCore.Components.Authorization
 @inject IPageRepository PageRepo
-
+@inject AuthenticationStateProvider AuthStateProvider
 
 <div class="top-row ps-3 navbar navbar-dark">
     <div class="container-fluid">
@@ -19,69 +20,101 @@
             </NavLink>
         </div>
 
+        <!-- 1. Visas för alla som INTE är inloggade -->
+        <AuthorizeView>
+            <NotAuthorized>
+                <div class="nav-item px-3">
+                    <NavLink class="nav-link" href="login">
+                        <span class="bi bi-box-arrow-in-right" aria-hidden="true"></span> Logga in
+                    </NavLink>
+                </div>
+                <div class="nav-item px-3">
+                    <NavLink class="nav-link" href="registrera">
+                        <span class="bi bi-person-plus" aria-hidden="true"></span> Registrera dig
+                    </NavLink>
+                </div>
+            </NotAuthorized>
+            
+            <!-- 2. Visas för alla som ÄR inloggade -->
+            <Authorized>
+                <div class="nav-item px-3 mt-3 mb-2 text-white-50">
+                    <small class="ms-3">Inloggad som: <strong>@loggedInUserName</strong></small>
+                </div>
+                <!-- Den nya utloggningsknappen -->
+                <div class="nav-item px-3">
+                    <a class="nav-link text-danger" href="/api/logout">
+                        <span class="bi bi-box-arrow-left" aria-hidden="true"></span> Logga ut
+                    </a>
+                </div>
+            </Authorized>
+        </AuthorizeView>
 
-        <div class="nav-item px-3">
-            <NavLink class="nav-link" href="registrera">
-                <span class="bi bi-person-plus" aria-hidden="true"></span> Registrera dig
-            </NavLink>
-        </div>
-
-
+        <!-- HÄR VISAS VANLIGA SIDOR -->
         @foreach (var p in publishedPages)
         {
-            <div class="nav-item pt-3">
+            <div class="nav-item px-3">
                 <NavLink class="nav-link" href="@($"/sida/{p.Id}")">
                     <span class="bi bi-file-text" aria-hidden="true"></span> @p.Title
                 </NavLink>
-                
             </div>
         }
 
         <div class="nav-item px-3">
-            <NavLink class="nav-link" href="counter">
-                <span class="bi bi-plus-square-fill-nav-menu" aria-hidden="true"></span> Counter
+            <NavLink class="nav-link" href="meddelanden">
+                <span class="bi bi-envelope-fill-nav-menu" aria-hidden="true"></span> Meddelanden
             </NavLink>
         </div>
 
+        <!-- HÄR VISAS VANLIGA SIDOR -->
         <div class="nav-item px-3">
-            <NavLink class="nav-link" href="weather">
-                <span class="bi bi-list-nested-nav-menu" aria-hidden="true"></span> Weather
+            <NavLink class="nav-link" href="forum">
+                <span class="bi bi-chat-text" aria-hidden="true"></span> Forum
             </NavLink>
         </div>
 
+        <!-- 3. Visas ENDAST för Admin -->
+        <AuthorizeView Roles="Admin">
+            <Authorized>
+                <hr class="text-white-50 mx-3" />
+                <div class="nav-item px-3">
+                    <NavLink class="nav-link" href="admin/anvandare">
+                        <span class="bi bi-people" aria-hidden="true"></span> Alla användare
+                    </NavLink>
+                </div>
+                <div class="nav-item px-3">
+                    <NavLink class="nav-link" href="admin/pages">
+                        <span class="bi bi-list" aria-hidden="true"></span> Admin: Alla sidor
+                    </NavLink>
+                </div>
+                <div class="nav-item px-3">
+                    <NavLink class="nav-link" href="admin/createpage">
+                        <span class="bi bi-plus-square" aria-hidden="true"></span> Admin: Skapa inlägg
+                    </NavLink>
 
-        <div class="nav-item px-3">
-            <NavLink class="nav-link" href="admin/sidor">
-                <span class="bi bi-list-nested-nav-menu" aria-hidden="true"></span> Admin alla sidor
-            </NavLink>
-        </div>
+                    <div class="nav-item px-3">
+                        <NavLink class="nav-link" href="admin/kategorier">
+                            <span class="bi bi-tags" aria-hidden="true"></span> Admin: Hantera Forum
+                        </NavLink>
+                    </div>
+                </div>
 
-        <div class="nav-item px-3">
-            <NavLink class="nav-link" href="admin/skapa-sida">
-                <span class="bi bi-plus-square-fill-nav-menu" aria-hidden="true"></span> Admin: Skapa sida
-            </NavLink>
-        </div>
-
-
+            </Authorized>
+        </AuthorizeView>
     </nav>
 </div>
 
 @code {
-    private bool collapseNavMenu = true;
-
-    private string? NavMenuCssClass => collapseNavMenu ? "collapse" : null;
-
-    private void ToggleNavMenu()
-    {
-        collapseNavMenu = !collapseNavMenu;
-    }
-
-    // för att hålla reda på de publicerade sidorna som ska visas i navigeringsmenyn
     private List<Page> publishedPages = new List<Page>();
+    private string loggedInUserName = "";
 
-    protected override void OnInitialized()
+    protected override async Task OnInitializedAsync()
     {
-        // Hämtar enbart de sidor som är markerade som publicerade
         publishedPages = PageRepo.GetAll().Where(p => p.IsPublished == true).ToList();
+        
+        var authState = await AuthStateProvider.GetAuthenticationStateAsync();
+        if (authState.User.Identity != null && authState.User.Identity.IsAuthenticated)
+        {
+            loggedInUserName = authState.User.Identity.Name ?? "";
+        }
     }
 }

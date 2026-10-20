@@ -1,4 +1,4 @@
-﻿@page "/admin/skapa-sida"
+﻿@page "/admin/createpage"
 @using PublicCMS.Core.Models
 @using PublicCMS.Core.Repositories
 @inject IPageRepository PageRepo
@@ -53,13 +53,18 @@
     {
         var fil = e.File;
 
-        var filnamn = fil.Name;
-        var sökväg = Path.Combine(Env.WebRootPath, "images", filnamn);
+        // Skapa ett unikt namn men behåll filändelsen (t.ex. .jpg)
+        var filnamn = Guid.NewGuid().ToString() + Path.GetExtension(fil.Name);
+    
+        // Se till att mappen existerar innan vi sparar
+        var mappSökväg = Path.Combine(Env.WebRootPath, "images");
+        Directory.CreateDirectory(mappSökväg); // Skapar mappen om den inte finns
 
+        var sökväg = Path.Combine(mappSökväg, filnamn);
 
         using var stream = new FileStream(sökväg, FileMode.Create);
         await fil.OpenReadStream(1024 * 1024 * 5).CopyToAsync(stream);
 
-        newPage.ImageUrl = $"/images/{filnamn}"; 
+        newPage.ImageUrl = $"/images/{filnamn}";
     }
 }
