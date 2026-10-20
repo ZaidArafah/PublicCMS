@@ -22,7 +22,7 @@ namespace PublicCMS.Web
 
 
             builder.Services.AddScoped<IUserRepository, UserRepository>();
-
+            builder.Services.AddControllers();
 
             builder.Services.AddScoped<IPageRepository, PageRepository>();
 
@@ -31,6 +31,8 @@ namespace PublicCMS.Web
             builder.Services.AddScoped<ICategoryRepository, CategoryRepository>();
 
             builder.Services.AddScoped<IPrivateMessageRepository, PrivateMessageRepository>();
+
+            builder.Services.AddScoped<IReportedPostRepository, ReportedPostRepository>();
 
             builder.Services.AddAuthentication(Microsoft.AspNetCore.Authentication.Cookies.CookieAuthenticationDefaults.AuthenticationScheme)
              .AddCookie(options =>
@@ -68,9 +70,9 @@ namespace PublicCMS.Web
             app.UseAuthentication();
             app.UseAuthorization();
 
+            app.MapControllers();
 
-
-            app.MapPost("/api/login", async (HttpContext ctx, PublicCMS.Core.Repositories.IUserRepository userRepo) =>
+            app.MapPost("/api/login", async (HttpContext ctx, PublicCMS.Core.Repositories.IUserRepository userRepo)  =>
             {
                 var form = await ctx.Request.ReadFormAsync();
                 string username = form["username"].ToString();
@@ -120,6 +122,13 @@ namespace PublicCMS.Web
                 await Microsoft.AspNetCore.Authentication.AuthenticationHttpContextExtensions.SignOutAsync(ctx, "Cookies");
                 ctx.Response.Redirect("/");
             });
+
+
+            using (var scope = app.Services.CreateScope())
+            {
+                var dbContext = scope.ServiceProvider.GetRequiredService<PublicCMS.Core.Data.AppDbContext>();
+                dbContext.Database.Migrate();
+            }
 
             app.Run();
         }

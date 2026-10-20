@@ -25,6 +25,8 @@ namespace PublicCMS.Core.Data
         public DbSet<ForumComment> ForumComments { get; set; }
 
         public DbSet<PrivateMessage> PrivateMessages { get; set; }
+
+        public DbSet<ReportedPost> ReportedPosts { get; set; }
     }
 }
  

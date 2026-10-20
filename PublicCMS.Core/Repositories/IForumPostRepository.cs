@@ -15,5 +15,6 @@ namespace PublicCMS.Web.Repositories
         void Delete(int id);
 
         void Update(ForumPost post);
+        List<ForumPost> GetByCategoryId(int categoryId);
     }
 }

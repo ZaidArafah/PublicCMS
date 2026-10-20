@@ -51,5 +51,13 @@ namespace PublicCMS.Core.Repositories
             _context.ForumPosts.Update(post);
             _context.SaveChanges();
         }
+
+        public List<ForumPost> GetByCategoryId(int categoryId)
+        {
+            return _context.ForumPosts
+                .Where(p => p.CategoryId == categoryId)
+                .OrderByDescending(p => p.CreatedAt)
+                .ToList();
+        }
     }
 }

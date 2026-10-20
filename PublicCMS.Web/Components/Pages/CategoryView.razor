@@ -8,6 +8,7 @@
 @inject AuthenticationStateProvider AuthStateProvider
 @using System.IO
 @inject IWebHostEnvironment Env
+@inject IReportedPostRepository ReportRepo
 
 @if (category == null)
 {
@@ -56,24 +57,49 @@ else
                                     <p class="card-text">@post.Content</p>
 
                                     <!-- HÄR ÄR KNAPPARNA FÖR REDIGERA / TA BORT -->
-                                    <div class="mt-2">
-                                        @if (currentUserName == post.AuthorName)
-                                        {
-                                            <a href="/redigera-inlagg/@post.Id" class="btn btn-sm btn-outline-primary me-2">
-                                                <i class="bi bi-pencil"></i> Redigera
-                                            </a>
-                                        }
+                                  
+                                        <div class="mt-2">
+                                            @if (currentUserName == post.AuthorName)
+                                            {
+                                                <a href="/redigera-inlagg/@post.Id" class="btn btn-sm btn-outline-primary me-2">
+                                                    <i class="bi bi-pencil"></i> Redigera
+                                                </a>
+                                            }
 
-                                        @if (isAdmin || currentUserName == post.AuthorName)
-                                        {
-                                            <button class="btn btn-sm btn-outline-danger" @onclick="() => TaBortInlagg(post.Id)">
-                                                <i class="bi bi-trash"></i> Ta bort
-                                            </button>
-                                        }
+                                            @if (isAdmin || currentUserName == post.AuthorName)
+                                            {
+                                                <button class="btn btn-sm btn-outline-danger me-2" @onclick="() => TaBortInlagg(post.Id)">
+                                                    <i class="bi bi-trash"></i> Ta bort
+                                                </button>
+                                            }
+
+                                            <!-- NY ANMÄL-FUNKTION MED TEXTRUTA OCH BEKRÄFTELSE -->
+                                            @if (!string.IsNullOrEmpty(currentUserName) && currentUserName != post.AuthorName)
+                                            {
+                                                @if (anmaldaInlagg.Contains(post.Id))
+                                                {
+                                                    <span class="text-success ms-2 fw-bold"><i class="bi bi-check-circle"></i> Anmälan skickad!</span>
+                                                }
+                                                else if (inlaggSomAnmals == post.Id)
+                                                {
+                                                    <div class="mt-2 p-2 border border-warning rounded bg-light d-inline-block">
+                                                        <input @bind="anmalningsAnledning" class="form-control form-control-sm mb-2" placeholder="Varför anmäler du inlägget?" />
+                                                        <button class="btn btn-sm btn-danger me-1" @onclick="() => SkickaAnmalan(post.Id)">Skicka</button>
+                                                        <button class="btn btn-sm btn-secondary" @onclick="AvbrytAnmalan">Avbryt</button>
+                                                    </div>
+                                                }
+                                                else
+                                                {
+                                                    <button class="btn btn-sm btn-warning text-dark ms-2" @onclick="() => BorjaAnmala(post.Id)">
+                                                        <i class="bi bi-flag"></i> Anmäl
+                                                    </button>
+                                                }
+                                            }
+                                        </div>
                                     </div>
                                 </div>
                             </div>
-                        </div>
+                  
                     }
                 }
             </div>
@@ -199,5 +225,45 @@ else
         await fil.OpenReadStream(1024 * 1024 * 5).CopyToAsync(stream);
 
         newPost.ImageUrl = $"/images/{filnamn}";
+    }
+    // Variabler för att hålla koll på anmälningar
+    private int? inlaggSomAnmals = null;
+    private string anmalningsAnledning = "";
+    private List<int> anmaldaInlagg = new List<int>();
+
+    private void BorjaAnmala(int id)
+    {
+        inlaggSomAnmals = id;
+        anmalningsAnledning = ""; // Töm textrutan
+    }
+
+    private void AvbrytAnmalan()
+    {
+        inlaggSomAnmals = null;
+    }
+
+    private void SkickaAnmalan(int inlaggId)
+    {
+        // Om användaren inte skriver något, sätter vi ett standardmeddelande
+        if (string.IsNullOrWhiteSpace(anmalningsAnledning))
+        {
+            anmalningsAnledning = "Ingen anledning angiven";
+        }
+
+        var nyAnmalan = new ReportedPost
+        {
+            ForumPostId = inlaggId,
+            ReportedBy = currentUserName,
+            Reason = anmalningsAnledning,
+            ReportedAt = DateTime.Now
+        };
+        
+        ReportRepo.AddReport(nyAnmalan);
+        
+        // Markera att detta inlägg är anmält så vi kan visa den gröna texten
+        anmaldaInlagg.Add(inlaggId);
+        
+        // Stäng formuläret
+        inlaggSomAnmals = null;
     }
 }
