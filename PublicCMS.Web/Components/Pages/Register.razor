@@ -48,11 +48,11 @@
    
         var filnamn = Guid.NewGuid().ToString() + "-" + fil.Name;
     
-        // LÄGG TILL DESSA TVÅ RADER:
+        
         var mappSökväg = Path.Combine(Env.WebRootPath, "images");
         Directory.CreateDirectory(mappSökväg);
 
-        var sökväg = Path.Combine(mappSökväg, filnamn); // Använd mappSökväg här
+        var sökväg = Path.Combine(mappSökväg, filnamn); 
 
         using var stream = new FileStream(sökväg, FileMode.Create);
         await fil.OpenReadStream(1024 * 1024 * 5).CopyToAsync(stream);

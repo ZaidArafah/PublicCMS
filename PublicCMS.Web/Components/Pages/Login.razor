@@ -5,6 +5,13 @@
         <h3>Logga in</h3>
         <p>Du måste vara inloggad för att hantera sidorna.</p>
 
+        @if (HasError == true)
+        {
+            <div class="alert alert-danger shadow-sm">
+                Fel användarnamn eller lösenord. Försök igen.
+            </div>
+        }
+
         <!-- Ett vanligt webbformulär som skickar datan till vår säkerhetskod -->
         <form action="/api/login" method="post">
             <div class="mb-3">
@@ -19,3 +26,9 @@
         </form>
     </div>
 </div>
+  
+
+@code {
+    [SupplyParameterFromQuery(Name = "error")]
+    public bool? HasError { get; set; }
+}

@@ -43,8 +43,8 @@
 
     private void SavePage()
     {
-        PageRepo.Add(newPage); // Spara sidan i databasen
-        isSaved = true; // visa meddelande om att sidan har sparats
+        PageRepo.Add(newPage);
+        isSaved = true; 
         newPage = new Page(); // återställ för skapa en ny sida
     }
 

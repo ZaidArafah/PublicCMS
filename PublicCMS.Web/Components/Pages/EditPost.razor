@@ -59,7 +59,7 @@
     {
         post = PostRepo.GetById(Id);
 
-        // Säkerhetskontroll: Om inlägget inte finns, eller om inloggad användare INTE är ägaren (och inte heller admin), skicka bort dem!
+        // Säkerhetskontroll: Om inlägget inte finns, eller om inloggad användare inte är ägaren och inte heller admin, skicka bort dem
         var authState = await AuthStateProvider.GetAuthenticationStateAsync();
         var user = authState.User;
 

@@ -44,7 +44,7 @@ else
                     </td>
                     <td class="align-middle fw-bold">@user.Username</td>
                     <td class="align-middle">
-                        @* Vi lägger in en spärr så att man inte råkar radera huvud-admin *@
+                        @* en spärr så att man inte råkar radera huvud-admin *@
                         @if (user.Username.ToLower() == "admin")
                         {
                             <span class="badge bg-secondary">System-admin (Krävs)</span>

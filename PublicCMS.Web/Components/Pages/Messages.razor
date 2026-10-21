@@ -5,6 +5,7 @@
 @using PublicCMS.Web.Repositories
 @inject IPrivateMessageRepository MessageRepo
 @inject AuthenticationStateProvider AuthStateProvider
+@inject IUserRepository UserRepo
 
 <AuthorizeView>
     <Authorized>
@@ -22,7 +23,26 @@
                         <div class="card-body">
                             <div class="mb-3">
                                 <label class="form-label fw-bold">Till (Mottagarens användarnamn):</label>
-                                <input @bind="newMessage.ReceiverName" class="form-control" placeholder="T.ex. Admin eller Användare" />
+                               
+                                <select @bind="newMessage.ReceiverName" class="form-select">
+                                    <option value="">-- Välj en mottagare --</option>
+    
+                                    @if (currentUserName.ToLower() != "admin")
+                                    {
+                                        <option value="Admin">Admin</option>
+                                    }
+
+                                    @if (allaAnvandare != null)
+                                    {
+                                        @foreach (var user in allaAnvandare)
+                                        {
+                                            if (user.Username != currentUserName && user.Username.ToLower() != "admin")
+                                            {
+                                                <option value="@user.Username">@user.Username</option>
+                                            }
+                                        }
+                                    }
+                                </select>
                             </div>
                             <div class="mb-3">
                                 <label class="form-label fw-bold">Meddelande:</label>
@@ -40,7 +60,7 @@
                     </div>
                 </div>
 
-                <!-- Höger sida: Inkorg -->
+                <!-- Inkorg -->
                 <div class="col-md-7">
                     <div class="card shadow-sm">
                         <div class="card-header bg-light">
@@ -87,6 +107,8 @@
     private PrivateMessage newMessage = new PrivateMessage();
     private string currentUserName = "";
     private bool meddelandeSkickat = false;
+    
+    private List<AppUser> allaAnvandare = new List<AppUser>();
 
     protected override async Task OnInitializedAsync()
     {
@@ -95,9 +117,9 @@
         {
             currentUserName = authState.User.Identity.Name ?? "";
             LaddaInkorg();
+            allaAnvandare = UserRepo.GetAll();
         }
     }
-
     private void LaddaInkorg()
     {
         if (!string.IsNullOrEmpty(currentUserName))
@@ -126,6 +148,5 @@
         await Task.Delay(3000);
         meddelandeSkickat = false;
         StateHasChanged();
-    }
     }
 }

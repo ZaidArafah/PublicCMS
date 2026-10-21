@@ -174,7 +174,6 @@ namespace PublicCMS.Core.Migrations
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
                     b.Property<string>("Bodytext")
-                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("CssStyle")
@@ -223,6 +222,33 @@ namespace PublicCMS.Core.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("PrivateMessages");
+                });
+
+            modelBuilder.Entity("PublicCMS.Core.Models.ReportedComment", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<int>("CommentId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Reason")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime>("ReportedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("ReportedBy")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("ReportedComments");
                 });
 
             modelBuilder.Entity("PublicCMS.Core.Models.ReportedPost", b =>

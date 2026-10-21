@@ -48,7 +48,7 @@ else
                                     <small class="d-block mt-1 fw-bold text-break">@post.AuthorName</small>
                                 </div>
                                 
-                                <!-- Själva inlägget -->
+                                <!-- själva inlägget -->
                                 <div class="flex-grow-1">
                                     <small class="text-muted float-end">@post.CreatedAt.ToString("yyyy-MM-dd HH:mm")</small>
                                     <a href="/inlagg/@post.Id" class="text-decoration-none">
@@ -56,7 +56,7 @@ else
                                     </a>
                                     <p class="card-text">@post.Content</p>
 
-                                    <!-- HÄR ÄR KNAPPARNA FÖR REDIGERA / TA BORT -->
+                                    <!-- knapparna för redigera, ta bort -->
                                   
                                         <div class="mt-2">
                                             @if (currentUserName == post.AuthorName)
@@ -73,7 +73,7 @@ else
                                                 </button>
                                             }
 
-                                            <!-- NY ANMÄL-FUNKTION MED TEXTRUTA OCH BEKRÄFTELSE -->
+                                            <!-- ny anmälan med textruta och bekräftelse -->
                                             @if (!string.IsNullOrEmpty(currentUserName) && currentUserName != post.AuthorName)
                                             {
                                                 @if (anmaldaInlagg.Contains(post.Id))
@@ -104,7 +104,7 @@ else
                 }
             </div>
 
-            <!-- Höger sida: Skapa inlägg -->
+            <!-- höger sida för Skapa inlägg -->
             <div class="col-md-4">
                 <AuthorizeView>
                     <Authorized>
@@ -157,7 +157,7 @@ else
     private string currentUserName = "";
     private bool isAdmin = false;
 
-    // Ändrad till async för att vi ska kunna kontrollera vem som är inloggad direkt när sidan laddas
+    // skriv async för att vi ska kunna kontrollera vem som är inloggad direkt när sidan laddas
     protected override async Task OnParametersSetAsync()
     {
         category = CategoryRepo.GetAll().FirstOrDefault(c => c.Id == Id);
@@ -176,11 +176,11 @@ else
         posts = PostRepo.GetPostsByCategory(Id);
     }
 
-    // NY METOD: Ta bort inlägg
+   
     private void TaBortInlagg(int id)
     {
         PostRepo.Delete(id);
-        LaddaInlagg(); // Ladda om listan direkt så att inlägget försvinner från skärmen
+        LaddaInlagg(); 
     }
 
     private async Task SparaInlagg()

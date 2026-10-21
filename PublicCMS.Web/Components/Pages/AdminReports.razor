@@ -21,7 +21,7 @@
             <thead class="table-dark">
                 <tr>
                     <th>Anmäld av</th>
-                    <th>Anledning</th> <!-- NY KOLUMN -->
+                    <th>Anledning</th> 
                     <th>Datum</th>
                     <th>Inlägg</th>
                     <th>Åtgärd</th>
@@ -32,17 +32,17 @@
                 {
                     <tr>
                         <td>@report.ReportedBy</td>
-                        <td class="text-danger fw-bold">@report.Reason</td> <!-- HÄR SKRIVS ANLEDNINGEN UT -->
+                        <td class="text-danger fw-bold">@report.Reason</td> 
                         <td>@report.ReportedAt.ToString("yyyy-MM-dd HH:mm")</td>
                         <td>
                             <a href="/inlagg/@report.ForumPostId" target="_blank">Läs inlägget (ID: @report.ForumPostId)</a>
                         </td>
                         <td>
-                            <!-- Ta bort inlägget helt (och anmälan) -->
+                            <!-- Ta bort inlägget helt och anmälan -->
                             <button class="btn btn-danger btn-sm me-2 mb-1" @onclick="() => TaBortInlagg(report.ForumPostId, report.Id)">
                                 Ta bort inlägg
                             </button>
-                            <!-- Ignorera anmälan (tar bara bort varningen) -->
+                            <!-- Ignorera anmälan tar bara bort varningen -->
                             <button class="btn btn-secondary btn-sm mb-1" @onclick="() => AvfardaAnmalan(report.Id)">
                                 Avfärda anmälan
                             </button>
@@ -80,7 +80,7 @@
 
     private void AvfardaAnmalan(int reportId)
     {
-        // Om inlägget var okej, tar vi bara bort anmälan
+        // om inlägget var okej, tar vi bara bort anmälan
         ReportRepo.DeleteReport(reportId);
         LaddaAnmalningar();
     }

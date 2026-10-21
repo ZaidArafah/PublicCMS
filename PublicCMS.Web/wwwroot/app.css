@@ -58,3 +58,45 @@ h1:focus {
 .form-floating > .form-control-plaintext:focus::placeholder, .form-floating > .form-control:focus::placeholder {
     text-align: start;
 }
+
+:root {
+    --bs-primary: #1b6ec2; /* Din nya huvudfärg (blå) */
+    --bs-primary-rgb: 82, 49, 143;
+    --bs-body-bg: #fff; /* Lite mjukare, ljusgrå bakgrund för hela sajten */
+}
+
+/* Fixar så att knapparna får rätt färg när man hovrar över dem */
+.btn-primary {
+    background-color: var(--bs-primary);
+    border-color: var(--bs-primary);
+    color: white;
+}
+
+    .btn-primary:hover {
+        background-color: #3b226b; /* Lite mörkare lila när man drar musen över */
+        border-color: #3b226b;
+        color: white;
+    }
+
+.btn-outline-primary {
+    color: var(--bs-primary);
+    border-color: var(--bs-primary);
+}
+
+    .btn-outline-primary:hover {
+        background-color: var(--bs-primary);
+        color: white;
+    }
+
+/* Tvingar Bootstrap-klasser att använda din nya färg */
+.text-primary {
+    color: var(--bs-primary) !important;
+}
+
+.bg-primary {
+    background-color: var(--bs-primary) !important;
+}
+
+.border-primary {
+    border-color: var(--bs-primary) !important;
+}

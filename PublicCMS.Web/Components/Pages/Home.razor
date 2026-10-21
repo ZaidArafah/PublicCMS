@@ -5,24 +5,67 @@
 
 <PageTitle>Start sida</PageTitle>
 
-<h1>Välkommen till min nya hemsida!</h1>
-<p>Här är de sidor som finns publicerade just nu:</p>
-
-<div class="list-group mt-4">
-    @foreach (var p in pages)
-    {
-        <a href="/sida/@p.Id" class="list-group-item list-group-item-action">
-            @p.Title
-        </a>
-    }
+<div class="p-5 mb-4 bg-light rounded-3 shadow-sm border-primary" style="border-top: 4px solid #0d6efd;">
+    <div class="container-fluid py-2">
+        <h1 class="display-5 fw-bold">Välkommen till PublicCMS!</h1>
+        <p class="col-md-8 fs-5 mt-3">
+            Det här är vår gemensamma samlingsplats. Här kan du läsa våra senaste artiklar,
+            hålla dig uppdaterad och delta i diskussionerna i vårt forum.
+            Skapa ett konto för att vara med och bidra!
+        </p>
+        <div class="mt-4">
+            <a href="/forum" class="btn btn-primary btn-lg me-2">Gå till forumet</a>
+            <a href="/registrera" class="btn btn-outline-secondary btn-lg">Skapa konto</a>
+        </div>
+    </div>
 </div>
+
+<h3 class="mb-4 mt-5">Senaste publicerade sidorna</h3>
+
+@if (pages == null || pages.Count == 0)
+{
+    <div class="alert alert-info shadow-sm">Inga sidor har publicerats ännu. Kika in senare!</div>
+}
+else
+{
+    <div class="row row-cols-1 row-cols-md-3 g-4 mb-5">
+        @foreach (var p in pages)
+        {
+            <div class="col">
+                <div class="card h-100 shadow-sm border-0" style="transition: transform 0.2s;">
+                
+                    @if (!string.IsNullOrEmpty(p.ImageUrl))
+                    {
+                        <img src="@p.ImageUrl" class="card-img-top" alt="@p.Title" style="height: 200px; object-fit: cover;" />
+                    }
+                    else
+                    {
+                        <div class="card-img-top bg-secondary d-flex align-items-center justify-content-center text-white" style="height: 200px;">
+                            <i class="bi bi-file-earmark-text" style="font-size: 4rem;"></i>
+                        </div>
+                    }
+                    
+                    <div class="card-body d-flex flex-column">
+                        <h5 class="card-title text-primary">@p.Title</h5>
+                        
+                      
+                        <p class="card-text text-muted flex-grow-1">
+                            @(string.IsNullOrEmpty(p.Bodytext) ? "" : (p.Bodytext.Length > 80 ? p.Bodytext.Substring(0, 80) + "..." : p.Bodytext))
+                        </p>
+                        
+                        <a href="/sida/@p.Id" class="btn btn-outline-primary mt-3 w-100">Läs mer</a>
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+}
 
 @code {
     private List<Page> pages = new List<Page>();
 
     protected override void OnInitialized()
     {
-        // Hämtar alla sidor, men soterar bort de som inte är publicerade
         pages = PageRepo.GetAll().Where(p => p.IsPublished == true).ToList();
     }
 }

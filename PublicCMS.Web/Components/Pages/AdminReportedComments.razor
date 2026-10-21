@@ -1,0 +1,87 @@
+﻿@page "/admin/anmalda-kommentarer"
+@using Microsoft.AspNetCore.Authorization
+@using PublicCMS.Core.Models
+@using PublicCMS.Core.Repositories
+@using PublicCMS.Web.Repositories
+@attribute [Authorize(Roles = "Admin")]
+@inject IReportedCommentRepository ReportCommentRepo
+@inject IForumCommentRepository CommentRepo
+
+<div class="container mt-4">
+    <h2 class="text-danger"><i class="bi bi-chat-left-dots-fill"></i> Granska anmälda kommentarer</h2>
+    <hr />
+
+    @if (reports.Count == 0)
+    {
+        <div class="alert alert-success">Det finns inga anmälda kommentarer just nu. Bra jobbat!</div>
+    }
+    else
+    {
+        <table class="table table-striped table-bordered mt-3 shadow-sm">
+            <thead class="table-dark">
+                <tr>
+                    <th>Anmäld av</th>
+                    <th>Anledning</th>
+                    <th>Datum</th>
+                    <th>Kommentar-ID</th>
+                    <th>Åtgärd</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var report in reports)
+                {
+                    <tr>
+                        <td>@report.ReportedBy</td>
+                        <td class="text-danger fw-bold">@report.Reason</td>
+                        <td>@report.ReportedAt.ToString("yyyy-MM-dd HH:mm")</td>
+                        <td>ID: @report.CommentId</td>
+                        <td>
+                            <!-- Ta bort kommentar helt och hållet från systemet -->
+                            <button class="btn btn-danger btn-sm me-2 mb-1" @onclick="() => TaBortKommentar(report.CommentId, report.Id)">
+                                Ta bort kommentar
+                            </button>
+                            <!-- Ignorera anmälan -->
+                            <button class="btn btn-secondary btn-sm mb-1" @onclick="() => AvfardaAnmalan(report.Id)">
+                                Avfärda anmälan
+                            </button>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    }
+</div>
+
+@code {
+    private List<ReportedComment> reports = new List<ReportedComment>();
+
+    protected override void OnInitialized()
+    {
+        LaddaAnmalningar();
+    }
+
+    private void LaddaAnmalningar()
+    {
+        // Hämtar listan. Dubbelkolla att din metod i IReportedCommentRepository heter just GetAll()
+        reports = ReportCommentRepo.GetAll();
+    }
+
+    private void TaBortKommentar(int commentId, int reportId)
+    {
+        // 1. Ta bort kommentaren från forumet
+        CommentRepo.Delete(commentId);
+        
+        // 2. Ta bort anmälan
+        ReportCommentRepo.Delete(reportId);
+        
+        LaddaAnmalningar();
+    }
+
+    private void AvfardaAnmalan(int reportId)
+    {
+        // 1. Ta bara bort anmälan
+        ReportCommentRepo.Delete(reportId);
+        
+        LaddaAnmalningar();
+    }
+}

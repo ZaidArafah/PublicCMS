@@ -13,7 +13,7 @@ namespace PublicCMS.Core.Models
         public string Title { get; set; }
 
         // huvudtexten på sidan
-        public string Bodytext { get; set; }
+        public string? Bodytext { get; set; }
 
         // URL till bild som visas på sidan
         public string ImageUrl { get; set; } = "";

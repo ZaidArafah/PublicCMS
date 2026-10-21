@@ -34,6 +34,8 @@ namespace PublicCMS.Web
 
             builder.Services.AddScoped<IReportedPostRepository, ReportedPostRepository>();
 
+            builder.Services.AddScoped<IReportedCommentRepository, ReportedCommentRepository>();
+
             builder.Services.AddAuthentication(Microsoft.AspNetCore.Authentication.Cookies.CookieAuthenticationDefaults.AuthenticationScheme)
              .AddCookie(options =>
             {
@@ -52,7 +54,7 @@ namespace PublicCMS.Web
             if (!app.Environment.IsDevelopment())
             {
                 app.UseExceptionHandler("/Error");
-                // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
+               
                 app.UseHsts();
             }
 
@@ -92,16 +94,16 @@ namespace PublicCMS.Web
                     return;
                 }
 
-                // Kolla databasen om en vanlig användare (eller databas-admin) försöker logga in
+                // Kolla databasen om en vanlig användare eller databas-admin försöker logga in
                 var user = userRepo.GetByUsername(username);
                 if (user != null && user.PasswordHash == password)
                 {
                     var userClaims = new List<System.Security.Claims.Claim> {
             new System.Security.Claims.Claim(System.Security.Claims.ClaimTypes.Name, user.Username),
             new System.Security.Claims.Claim("ProfileImage", user.ProfileImageUrl ?? "")
-        }; 
+        };
 
-                    // Om användaren i databasen heter "admin", ge dem administratörsrättigheter
+                    // ge dem administratörsrättigheter till admin-sidorna om de är admin
                     if (user.Username.ToLower() == "admin")
                     {
                         userClaims.Add(new System.Security.Claims.Claim(System.Security.Claims.ClaimTypes.Role, "Admin"));
@@ -114,7 +116,7 @@ namespace PublicCMS.Web
                     return;
                 }
 
-                ctx.Response.Redirect("/login");
+                ctx.Response.Redirect("/login?error=true");
             }).DisableAntiforgery();
 
             app.MapGet("/api/logout", async (HttpContext ctx) =>
@@ -130,7 +132,35 @@ namespace PublicCMS.Web
                 dbContext.Database.Migrate();
             }
 
+            app.MapGet("/api/inlagg/{postId}/komplett", (int postId, IForumPostRepository postRepo, IForumCommentRepository commentRepo) =>
+            {
+                // 1. Hämta alla inlägg och hitta det som matchar vårt ID
+                var inlagg = postRepo.GetById(postId);
+
+                if (inlagg == null)
+                {
+                    return Results.NotFound(new { message = "Inlägget hittades inte." });
+                }
+
+                // 2. Hämta kommentarerna och filtrera fram de som tillhör just detta inlägg
+                // OrderByDescending sorterar dem så att den nyaste kommentaren hamnar överst!
+                var kommentarer = commentRepo.GetCommentsByPost(postId)
+                                             .OrderByDescending(c => c.CreatedAt)
+                                             .ToList();
+
+                // 3. Baka ihop inlägget och kommentarerna till ett gemensamt paket
+                var komplettResultat = new
+                {
+                    Inlagg = inlagg,
+                    Kommentarer = kommentarer
+                };
+
+                return Results.Ok(komplettResultat);
+            });
+
+
             app.Run();
+
         }
     }
 }

@@ -10,7 +10,7 @@ namespace PublicCMS.Web.Repositories
         void Add(ForumComment comment);
         List<ForumComment> GetCommentsByPost(int postId);
 
-
+        void Delete(int id);
 
     }
 }
