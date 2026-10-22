@@ -18,7 +18,7 @@ namespace PublicCMS.Web
 
             // det tilläggs för att kunna använda Entity Framework Core med SQL Server
             builder.Services.AddDbContext<AppDbContext>(options =>
-    options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
+             options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 
 
             builder.Services.AddScoped<IUserRepository, UserRepository>();
@@ -84,9 +84,9 @@ namespace PublicCMS.Web
                 if (username == "admin" && password == "1234")
                 {
                     var adminClaims = new List<System.Security.Claims.Claim> {
-            new System.Security.Claims.Claim(System.Security.Claims.ClaimTypes.Name, "admin"),
-            new System.Security.Claims.Claim(System.Security.Claims.ClaimTypes.Role, "Admin") // Ger admin-rättigheter
-        };
+                    new System.Security.Claims.Claim(System.Security.Claims.ClaimTypes.Name, "admin"),
+                    new System.Security.Claims.Claim(System.Security.Claims.ClaimTypes.Role, "Admin") // Ger admin-rättigheter
+                   };
                     var adminIdentity = new System.Security.Claims.ClaimsIdentity(adminClaims, "Cookies");
                     await Microsoft.AspNetCore.Authentication.AuthenticationHttpContextExtensions.SignInAsync(ctx, "Cookies", new System.Security.Claims.ClaimsPrincipal(adminIdentity));
 
@@ -94,16 +94,14 @@ namespace PublicCMS.Web
                     return;
                 }
 
-                // Kolla databasen om en vanlig användare eller databas-admin försöker logga in
                 var user = userRepo.GetByUsername(username);
                 if (user != null && user.PasswordHash == password)
                 {
-                    var userClaims = new List<System.Security.Claims.Claim> {
-            new System.Security.Claims.Claim(System.Security.Claims.ClaimTypes.Name, user.Username),
-            new System.Security.Claims.Claim("ProfileImage", user.ProfileImageUrl ?? "")
-        };
+                   var userClaims = new List<System.Security.Claims.Claim> {
+                   new System.Security.Claims.Claim(System.Security.Claims.ClaimTypes.Name, user.Username),
+                   new System.Security.Claims.Claim("ProfileImage", user.ProfileImageUrl ?? "")
+                  };
 
-                    // ge dem administratörsrättigheter till admin-sidorna om de är admin
                     if (user.Username.ToLower() == "admin")
                     {
                         userClaims.Add(new System.Security.Claims.Claim(System.Security.Claims.ClaimTypes.Role, "Admin"));
@@ -134,7 +132,6 @@ namespace PublicCMS.Web
 
             app.MapGet("/api/inlagg/{postId}/komplett", (int postId, IForumPostRepository postRepo, IForumCommentRepository commentRepo) =>
             {
-                // 1. Hämta alla inlägg och hitta det som matchar vårt ID
                 var inlagg = postRepo.GetById(postId);
 
                 if (inlagg == null)
@@ -142,13 +139,9 @@ namespace PublicCMS.Web
                     return Results.NotFound(new { message = "Inlägget hittades inte." });
                 }
 
-                // 2. Hämta kommentarerna och filtrera fram de som tillhör just detta inlägg
-                // OrderByDescending sorterar dem så att den nyaste kommentaren hamnar överst!
                 var kommentarer = commentRepo.GetCommentsByPost(postId)
                                              .OrderByDescending(c => c.CreatedAt)
                                              .ToList();
-
-                // 3. Baka ihop inlägget och kommentarerna till ett gemensamt paket
                 var komplettResultat = new
                 {
                     Inlagg = inlagg,

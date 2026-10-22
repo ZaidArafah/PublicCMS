@@ -31,12 +31,10 @@ namespace PublicCMS.Web.Repositories
 
         public void Delete(int id)
         {
-            // Leta upp kommentaren i databasen baserat på ID
             var comment = _context.ForumComments.FirstOrDefault(c => c.Id == id);
 
             if (comment != null)
             {
-                // Ta bort den och spara ändringarna
                 _context.ForumComments.Remove(comment);
                 _context.SaveChanges();
             }

@@ -62,16 +62,13 @@
 
     private void LaddaAnmalningar()
     {
-        // Hämtar listan. Dubbelkolla att din metod i IReportedCommentRepository heter just GetAll()
         reports = ReportCommentRepo.GetAll();
     }
 
     private void TaBortKommentar(int commentId, int reportId)
     {
-        // 1. Ta bort kommentaren från forumet
         CommentRepo.Delete(commentId);
         
-        // 2. Ta bort anmälan
         ReportCommentRepo.Delete(reportId);
         
         LaddaAnmalningar();
@@ -79,7 +76,6 @@
 
     private void AvfardaAnmalan(int reportId)
     {
-        // 1. Ta bara bort anmälan
         ReportCommentRepo.Delete(reportId);
         
         LaddaAnmalningar();
