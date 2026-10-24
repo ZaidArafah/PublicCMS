@@ -10,7 +10,6 @@ namespace PublicCMS.Core.Repositories
     {
         private readonly AppDbContext _context;
 
-        // Konstruktor som hämtar databasen via dependency injection
         public PageRepository(AppDbContext context)
         {
             _context = context;

@@ -7,13 +7,8 @@ namespace PublicCMS.Core.Repositories
 {
     public interface IPageRepository
     {
-        // hämta alla sidor
         List<Page> GetAll();
-
-        // hämta en sida med id
         Page GetById(int id);
-
-        // spara en ny sida
         void Add(Page page);
 
         void Delete(int id);

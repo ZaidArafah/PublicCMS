@@ -150,11 +150,9 @@ else
     private List<ForumPost> posts = new List<ForumPost>();
     private ForumPost newPost = new ForumPost();
 
-    // Nya variabler för att hålla koll på rättigheter
     private string currentUserName = "";
     private bool isAdmin = false;
 
-    // skriv async för att vi ska kunna kontrollera vem som är inloggad direkt när sidan laddas
     protected override async Task OnParametersSetAsync()
     {
         category = CategoryRepo.GetAll().FirstOrDefault(c => c.Id == Id);
@@ -170,7 +168,7 @@ else
 
     private void LaddaInlagg()
     {
-        posts = PostRepo.GetPostsByCategory(Id);
+        posts = PostRepo.GetByCategoryId(Id);
     }
 
    
@@ -223,7 +221,6 @@ else
 
         newPost.ImageUrl = $"/images/{filnamn}";
     }
-    // Variabler för att hålla koll på anmälningar
     private int? inlaggSomAnmals = null;
     private string anmalningsAnledning = "";
     private List<int> anmaldaInlagg = new List<int>();
@@ -231,7 +228,7 @@ else
     private void BorjaAnmala(int id)
     {
         inlaggSomAnmals = id;
-        anmalningsAnledning = ""; // Töm textrutan
+        anmalningsAnledning = "";
     }
 
     private void AvbrytAnmalan()
@@ -241,7 +238,6 @@ else
 
     private void SkickaAnmalan(int inlaggId)
     {
-        // Om användaren inte skriver något, sätter vi ett standardmeddelande
         if (string.IsNullOrWhiteSpace(anmalningsAnledning))
         {
             anmalningsAnledning = "Ingen anledning angiven";
@@ -257,10 +253,8 @@ else
         
         ReportRepo.AddReport(nyAnmalan);
         
-        // Markera att detta inlägg är anmält så vi kan visa den gröna texten
         anmaldaInlagg.Add(inlaggId);
         
-        // Stäng formuläret
         inlaggSomAnmals = null;
     }
 }

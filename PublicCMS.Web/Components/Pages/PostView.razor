@@ -5,7 +5,6 @@
 @using PublicCMS.Web.Repositories
 @inject IForumPostRepository PostRepo
 @inject IForumCommentRepository CommentRepo
-@inject AuthenticationStateProvider AuthStateProvider
 @inject PublicCMS.Core.Repositories.IReportedCommentRepository ReportedCommentRepo
 @inject AuthenticationStateProvider AuthStateProvider
 
@@ -16,12 +15,10 @@
 else
 {
     <div class="container mt-4">
-        <!-- Tillbaka-knapp -->
         <a href="/kategori/@post.CategoryId" class="btn btn-outline-secondary mb-3">
             <span class="bi bi-arrow-left"></span> Tillbaka
         </a>
 
-        <!-- Huvudinlägget -->
         <div class="card mb-4 border-primary shadow-sm">
             <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
                 <h3 class="mb-0 fs-4">@post.Title</h3>
@@ -51,7 +48,6 @@ else
             </div>
         </div>
 
-        <!-- Kommentarer -->
         <h4 class="mb-3">Kommentarer (@comments.Count)</h4>
         
         @if (comments.Count == 0)
@@ -96,7 +92,6 @@ else
             }
         }
 
-        <!-- Skriv en ny kommentar -->
         <div class="card mt-4 mb-5 bg-light ms-4 ms-md-5 border-secondary shadow-sm">
             <div class="card-body">
                 <AuthorizeView>
@@ -137,7 +132,7 @@ else
         comments = CommentRepo.GetCommentsByPost(Id);
     }
 
-    private async Task SparaKommentar()
+  private async Task SparaKommentar()
     {
         if (string.IsNullOrWhiteSpace(newComment.Content)) return;
 
@@ -161,9 +156,9 @@ else
 
             newComment = new ForumComment(); 
             LaddaKommentarer(); 
-        }
+        } 
+        } 
 
-        @code {
     private List<int> reportedComments = new List<int>();
     private string inloggadAnvandare = "Okänd";
 
@@ -174,7 +169,6 @@ else
         {
             inloggadAnvandare = authState.User.Identity.Name;
         }
-        
     }
 
     private void ReportComment(int commentId)
@@ -194,6 +188,4 @@ else
             reportedComments.Add(commentId);
         }
     }
-}
-    }
-}
+} 

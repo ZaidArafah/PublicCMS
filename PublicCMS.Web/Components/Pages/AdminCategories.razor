@@ -53,7 +53,8 @@ else
     </table>
 }
 
-@code {
+@code{
+
     private List<Category> categories = new List<Category>();
     private Category newCategory = new Category();
 
@@ -72,9 +73,8 @@ else
         if (!string.IsNullOrWhiteSpace(newCategory.Name))
         {
             CategoryRepo.Add(newCategory);
-            newCategory = new Category(); // Töm formuläret
-            LaddaKategorier(); // Uppdatera listan
-        }
+            newCategory = new Category();
+        }     LaddaKategorier(); 
     }
 
     private void TaBortKategori(int id)

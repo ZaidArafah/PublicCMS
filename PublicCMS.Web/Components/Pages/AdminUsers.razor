@@ -72,16 +72,13 @@ else
 
     private void LaddaAnvandare()
     {
-        // Hämtar alla användare från databasen
         users = UserRepo.GetAll();
     }
 
     private void TaBortAnvandare(int id)
     {
-        // Ta bort användaren från databasen
         UserRepo.Delete(id);
         
-        // Ladda om listan så att den uppdateras direkt på skärmen
         LaddaAnvandare();
     }
 }

@@ -23,7 +23,6 @@
                             <h4 class="card-title text-primary">@cat.Name</h4>
                             <p class="card-text text-muted">@cat.Description</p>
                             
-                            <!-- Denna länk tar användaren till din befintliga CategoryView.razor! -->
                             <a href="/kategori/@cat.Id" class="btn btn-outline-primary mt-2">
                                 Gå till ämnet & Skriv inlägg <i class="bi bi-arrow-right"></i>
                             </a>
@@ -40,7 +39,6 @@
 
     protected override void OnInitialized()
     {
-        // Hämtar alla forumkategorier så besökarna kan se dem
         categories = CategoryRepo.GetAll();
     }
 }

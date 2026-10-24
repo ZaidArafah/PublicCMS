@@ -38,11 +38,9 @@
                             <a href="/inlagg/@report.ForumPostId" target="_blank">Läs inlägget (ID: @report.ForumPostId)</a>
                         </td>
                         <td>
-                            <!-- Ta bort inlägget helt och anmälan -->
                             <button class="btn btn-danger btn-sm me-2 mb-1" @onclick="() => TaBortInlagg(report.ForumPostId, report.Id)">
                                 Ta bort inlägg
                             </button>
-                            <!-- Ignorera anmälan tar bara bort varningen -->
                             <button class="btn btn-secondary btn-sm mb-1" @onclick="() => AvfardaAnmalan(report.Id)">
                                 Avfärda anmälan
                             </button>
@@ -69,10 +67,8 @@
 
     private void TaBortInlagg(int postId, int reportId)
     {
-        // Ta först bort inlägget från forumet
         PostRepo.Delete(postId);
         
-        // Ta sedan bort anmälan från listan
         ReportRepo.DeleteReport(reportId);
         
         LaddaAnmalningar();
@@ -80,7 +76,6 @@
 
     private void AvfardaAnmalan(int reportId)
     {
-        // om inlägget var okej, tar vi bara bort anmälan
         ReportRepo.DeleteReport(reportId);
         LaddaAnmalningar();
     }

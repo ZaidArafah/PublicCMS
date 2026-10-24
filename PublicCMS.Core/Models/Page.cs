@@ -8,17 +8,9 @@ namespace PublicCMS.Core.Models
     {
         
         public int Id { get; set; }
-
-        // för sidan rubrik
         public string Title { get; set; }
-
-        // huvudtexten på sidan
         public string? Bodytext { get; set; }
-
-        // URL till bild som visas på sidan
         public string ImageUrl { get; set; } = "";
-
-        // CSS-stil för sidan
         public string CssStyle { get; set; } = "";
 
         public bool IsPublished { get; set; } = true;

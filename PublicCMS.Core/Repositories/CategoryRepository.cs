@@ -25,7 +25,7 @@ namespace PublicCMS.Web.Repositories
 
         public void Delete(int id)
         {
-            var category = _context.Categories.Find(id); // Leta upp kategorin via ID
+            var category = _context.Categories.Find(id); 
             if (category != null)
             {
                 _context.Categories.Remove(category);

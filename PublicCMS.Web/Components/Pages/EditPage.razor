@@ -37,13 +37,11 @@
 
     protected override void OnInitialized()
     {
-        // Hämtar sidan vi klickat på från databasen
         editPage = PageRepo.GetById(Id);
     }
 
     private void SaveChanges()
     {
-        // Uppdaterar i databasen och skickar oss tillbaka till listan
         PageRepo.Update(editPage);
         NavManager.NavigateTo("/admin/sidor");
     }

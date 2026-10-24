@@ -12,17 +12,16 @@ namespace PublicCMS.Web
         {
             var builder = WebApplication.CreateBuilder(args);
 
-            // Add services to the container.
             builder.Services.AddRazorComponents()
                 .AddInteractiveServerComponents();
 
-            // det tilläggs för att kunna använda Entity Framework Core med SQL Server
             builder.Services.AddDbContext<AppDbContext>(options =>
              options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 
 
             builder.Services.AddScoped<IUserRepository, UserRepository>();
             builder.Services.AddControllers();
+            builder.Services.AddSwaggerGen();
 
             builder.Services.AddScoped<IPageRepository, PageRepository>();
 
@@ -47,17 +46,16 @@ namespace PublicCMS.Web
 
             builder.Services.AddCascadingAuthenticationState();
 
-
+      
             var app = builder.Build();
 
-            // Configure the HTTP request pipeline.
             if (!app.Environment.IsDevelopment())
             {
                 app.UseExceptionHandler("/Error");
                
                 app.UseHsts();
             }
-
+            
             app.UseStatusCodePagesWithReExecute("/not-found", createScopeForStatusCodePages: true);
             app.UseHttpsRedirection();
 
@@ -74,18 +72,21 @@ namespace PublicCMS.Web
 
             app.MapControllers();
 
+            app.UseSwagger();
+            app.UseSwaggerUI();
+
+
             app.MapPost("/api/login", async (HttpContext ctx, PublicCMS.Core.Repositories.IUserRepository userRepo)  =>
             {
                 var form = await ctx.Request.ReadFormAsync();
                 string username = form["username"].ToString();
                 string password = form["password"].ToString();
 
-                //  Släpp in den inbyggda Admin till admin-sidorna
                 if (username == "admin" && password == "1234")
                 {
                     var adminClaims = new List<System.Security.Claims.Claim> {
                     new System.Security.Claims.Claim(System.Security.Claims.ClaimTypes.Name, "admin"),
-                    new System.Security.Claims.Claim(System.Security.Claims.ClaimTypes.Role, "Admin") // Ger admin-rättigheter
+                    new System.Security.Claims.Claim(System.Security.Claims.ClaimTypes.Role, "Admin") 
                    };
                     var adminIdentity = new System.Security.Claims.ClaimsIdentity(adminClaims, "Cookies");
                     await Microsoft.AspNetCore.Authentication.AuthenticationHttpContextExtensions.SignInAsync(ctx, "Cookies", new System.Security.Claims.ClaimsPrincipal(adminIdentity));
@@ -117,11 +118,12 @@ namespace PublicCMS.Web
                 ctx.Response.Redirect("/login?error=true");
             }).DisableAntiforgery();
 
+
             app.MapGet("/api/logout", async (HttpContext ctx) =>
             {
                 await Microsoft.AspNetCore.Authentication.AuthenticationHttpContextExtensions.SignOutAsync(ctx, "Cookies");
                 ctx.Response.Redirect("/");
-            });
+            }).ExcludeFromDescription();
 
 
             using (var scope = app.Services.CreateScope())
@@ -129,28 +131,6 @@ namespace PublicCMS.Web
                 var dbContext = scope.ServiceProvider.GetRequiredService<PublicCMS.Core.Data.AppDbContext>();
                 dbContext.Database.Migrate();
             }
-
-            app.MapGet("/api/inlagg/{postId}/komplett", (int postId, IForumPostRepository postRepo, IForumCommentRepository commentRepo) =>
-            {
-                var inlagg = postRepo.GetById(postId);
-
-                if (inlagg == null)
-                {
-                    return Results.NotFound(new { message = "Inlägget hittades inte." });
-                }
-
-                var kommentarer = commentRepo.GetCommentsByPost(postId)
-                                             .OrderByDescending(c => c.CreatedAt)
-                                             .ToList();
-                var komplettResultat = new
-                {
-                    Inlagg = inlagg,
-                    Kommentarer = kommentarer
-                };
-
-                return Results.Ok(komplettResultat);
-            });
-
 
             app.Run();
 

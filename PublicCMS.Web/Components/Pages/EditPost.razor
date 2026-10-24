@@ -95,7 +95,6 @@
         if (post != null)
         {
             PostRepo.Update(post);
-            // Skicka tillbaka användaren till kategorin (eller föregående sida)
             Navigation.NavigateTo($"/kategori/{post.CategoryId}");
         }
     }

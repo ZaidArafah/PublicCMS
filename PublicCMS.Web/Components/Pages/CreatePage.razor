@@ -4,7 +4,7 @@
 @inject IPageRepository PageRepo
 @inject IWebHostEnvironment Env
 @using Microsoft.AspNetCore.Authorization
-@attribute [Authorize]
+@attribute [Authorize] 
 
 
 <h3>Skapa Ny Sida</h3>
@@ -45,7 +45,7 @@
     {
         PageRepo.Add(newPage);
         isSaved = true; 
-        newPage = new Page(); // återställ för skapa en ny sida
+        newPage = new Page(); 
     }
 
 
@@ -53,12 +53,10 @@
     {
         var fil = e.File;
 
-        // Skapa ett unikt namn men behåll filändelsen (t.ex. .jpg)
         var filnamn = Guid.NewGuid().ToString() + Path.GetExtension(fil.Name);
     
-        // Se till att mappen existerar innan vi sparar
         var mappSökväg = Path.Combine(Env.WebRootPath, "images");
-        Directory.CreateDirectory(mappSökväg); // Skapar mappen om den inte finns
+        Directory.CreateDirectory(mappSökväg);
 
         var sökväg = Path.Combine(mappSökväg, filnamn);
 

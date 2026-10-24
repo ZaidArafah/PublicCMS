@@ -16,7 +16,6 @@ namespace PublicCMS.Web.Controllers
             _postRepo = postRepo;
         }
 
-        // Hämtar alla inlägg för en specifik kategori (diskussion)
         [HttpGet("diskussion/{categoryId}")]
         public IActionResult GetPostsForDiscussion(int categoryId)
         {
@@ -26,8 +25,6 @@ namespace PublicCMS.Web.Controllers
             {
                 return NotFound("Inga inlägg hittades för denna diskussion.");
             }
-
-            // Returnerar listan som JSON
             return Ok(posts);
         }
     }

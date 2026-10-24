@@ -27,14 +27,6 @@ namespace PublicCMS.Core.Repositories
             return _context.ForumPosts.FirstOrDefault(p => p.Id == id);
         }
 
-        public List<ForumPost> GetPostsByCategory(int categoryId)
-        {
-            return _context.ForumPosts
-                .Where(p => p.CategoryId == categoryId).ToList()
-                .OrderByDescending(p => p.CreatedAt)
-                .ToList();
-        }
-
 
         public void Delete(int id)
         {

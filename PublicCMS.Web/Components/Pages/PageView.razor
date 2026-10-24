@@ -22,7 +22,6 @@ else
 }
 
 @code {
-    // Detta fångar upp siffran från webbadressen
     [Parameter]
     public int Id { get; set; }
 
@@ -30,7 +29,6 @@ else
 
     protected override void OnInitialized()
     {
-        // Hämtar exakt den sida som matchar ID:t
         currentPage = PageRepo.GetById(Id);
     }
 }

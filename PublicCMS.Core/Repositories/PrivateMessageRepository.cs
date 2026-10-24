@@ -23,7 +23,6 @@ namespace PublicCMS.Web.Repositories
 
         public List<PrivateMessage> GetMessagesForUser(string username)
         {
-            // Hämtar alla meddelanden som har skickats TILL användaren
             return _context.PrivateMessages
                 .Where(m => m.ReceiverName == username)
                 .OrderByDescending(m => m.SentAt)

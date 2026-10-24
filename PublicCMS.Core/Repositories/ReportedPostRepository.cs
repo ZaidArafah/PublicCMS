@@ -23,7 +23,6 @@ namespace PublicCMS.Core.Repositories
 
         public List<ReportedPost> GetAllReports()
         {
-            // Hämtar alla anmälningar, nyaste först
             return _context.ReportedPosts.OrderByDescending(r => r.ReportedAt).ToList();
         }
 

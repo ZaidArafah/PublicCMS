@@ -8,7 +8,6 @@ namespace PublicCMS.Web.Repositories
     public interface IForumPostRepository
     {
         void Add (ForumPost post);
-        List<ForumPost> GetPostsByCategory(int categoryId);
 
         ForumPost GetById(int id);
 

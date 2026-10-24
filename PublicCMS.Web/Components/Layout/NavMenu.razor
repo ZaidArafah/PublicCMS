@@ -1,7 +1,6 @@
 ﻿@using PublicCMS.Core.Repositories
 @using PublicCMS.Core.Models
 @using Microsoft.AspNetCore.Components.Authorization
-@inject IPageRepository PageRepo
 @inject AuthenticationStateProvider AuthStateProvider
 
 <div class="top-row ps-3 navbar navbar-dark">
@@ -20,7 +19,12 @@
             </NavLink>
         </div>
 
-        <!-- 1. Visas för alla som INTE är inloggade -->
+        <div class="nav-item px-3">
+            <a class="nav-link" href="swagger" target="_blank">
+                <span class="oi oi-external-link" aria-hidden="true"></span> Mitt API (Swagger)
+            </a>
+        </div>
+
         <AuthorizeView>
             <NotAuthorized>
                 <div class="nav-item px-3">
@@ -35,12 +39,11 @@
                 </div>
             </NotAuthorized>
             
-            <!-- Visas för alla som ÄR inloggade -->
             <Authorized>
                 <div class="nav-item px-3 mt-3 mb-2 text-white-50">
                     <small class="ms-3">Inloggad som: <strong>@loggedInUserName</strong></small>
                 </div>
-                <!-- utloggningsknappen -->
+
                 <div class="nav-item px-3">
                     <a class="nav-link text-danger" href="/api/logout">
                         <span class="bi bi-box-arrow-left" aria-hidden="true"></span> Logga ut
@@ -56,14 +59,12 @@
             </NavLink>
         </div>
 
-        <!-- HÄR VISAS VANLIGA SIDOR -->
         <div class="nav-item px-3">
             <NavLink class="nav-link" href="forum">
                 <span class="bi bi-chat-text" aria-hidden="true"></span> Forum
             </NavLink>
         </div>
 
-        <!-- Visas ENDAST för Admin -->
         <AuthorizeView Roles="Admin">
             <Authorized>
                 <hr class="text-white-50 mx-3" />
@@ -105,13 +106,11 @@
 </div>
 
 @code {
-    private List<Page> publishedPages = new List<Page>();
+
     private string loggedInUserName = "";
     
     protected override async Task OnInitializedAsync()
-    {
-        publishedPages = PageRepo.GetAll().Where(p => p.IsPublished == true).ToList();
-        
+    {   
         var authState = await AuthStateProvider.GetAuthenticationStateAsync();
         if (authState.User.Identity != null && authState.User.Identity.IsAuthenticated)
         {
