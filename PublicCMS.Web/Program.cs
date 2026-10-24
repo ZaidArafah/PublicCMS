@@ -75,7 +75,8 @@ namespace PublicCMS.Web
             app.UseSwagger();
             app.UseSwaggerUI();
 
-
+            // Notering: fick hjälp av ai med att strukturera inlogningen, utloggningen (minmal api), frö att kunna sätta inloggning cookies.
+          
             app.MapPost("/api/login", async (HttpContext ctx, PublicCMS.Core.Repositories.IUserRepository userRepo)  =>
             {
                 var form = await ctx.Request.ReadFormAsync();
